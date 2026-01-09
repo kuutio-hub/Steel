@@ -1,36 +1,44 @@
+Készíts egy teljes, responzív, modern, ipari jellegű, magyar nyelvű webalkalkalmazást „Metal Calculator” néven. A webappnak GitHub Pagesen azonnal futnia kell.
 
-Készíts egy teljes, reszponzív, modern, ipari jellegű, magyar nyelvű webalkalmazást „Metal Calculator” néven. A webappnak GitHub Pagesen azonnal futnia kell.
-
-A projekt legyen egyetlen `index.html` fájl, amely tartalmazza a HTML-t, a CSS-t `<style>` tagekben, és a JavaScriptet `<script>` tagekben. A projektnek CDN-ről kell betöltenie a `jsPDF` és `Chart.js` könyvtárakat. Minden belső hivatkozás legyen relatív. Az alkalmazásnak offline is működnie kell, kivéve az API hívásokat.
+A projekt legyen egyetlen `index.html` fájl, amely tartalmazza a HTML-t, a CSS-t `<style>` tagekben, és a JavaScriptet `<script>` tagekben. A projektnek CDN-ről kell betöltenie a `Chart.js` könyvtárat. Minden belső hivatkozás legyen relatív. Az alkalmazásnak offline is működnie kell, kivéve az API hívásokat.
 
 **1. Általános UI és Elrendezés:**
--   **Színséma:** Világos és sötét móddal is rendelkezzen (`prefers-color-scheme` alapú automatikus, és manuális kapcsoló). A sötét mód legyen az alapértelmezett. A színek legyenek kontrasztosak, ipari jellegűek (pl. `dark-theme-background: #18191a`, `accent: #2d88ff`, `highlight: #ffc107`).
--   **Elrendezés:** Nagy képernyőn (992px felett) egy kétoszlopos rács, középen egy 10px széles, egérrel mozgatható elválasztóval (`resizer`). A két oszlop minimális szélessége 350px. A belső elemeknek (`.results-grid`, `.dimension-fields-container`) reszponzívan kell tördelniük magukat a rendelkezésre álló hely szerint (`grid-template-columns: repeat(auto-fit, minmax(140px, 1fr))`). 992px alatt az elrendezés váltson egyoszloposra, és a `resizer` tűnjön el.
--   **Fejléc:** Tartalmazza a "Metal Calculator" címet, egy nyelvválasztót, és a sötét/világos mód kapcsolót.
+-   **Színséma:** Világos és sötét móddal is rendelkezzen (`prefers-color-scheme` alapú automatikus, és manuális kapcsoló). A sötét mód legyen az alapértelmezett. A színek legyenek kontrasztosak, ipari jellegűek (pl. `dark-theme-background: #18191a`, `secondary-background: #242526`, `accent: #2d88ff`, `text-primary: #e4e6eb`).
+-   **Elrendezés:** Nagy képernyőn (992px felett) egy kétoszlopos rács (`grid-template-columns: minmax(350px, 1fr) 10px minmax(350px, 1fr)`), középen egy 10px széles, egérrel mozgatható elválasztóval (`#resizer`). A két oszlop minimális szélessége 350px. A belső elemeknek (`.results-grid`, `.dimension-fields-container`) reszponzívan kell tördelniük magukat a rendelkezésre álló hely szerint (`grid-template-columns: repeat(auto-fit, minmax(140px, 1fr))`). 992px alatt az elrendezés váltson egyoszloposra, és a `resizer` tűnjön el.
+-   **Fejléc:** Tartalmazza a "Metal Calculator" címet, egy nyelvválasztót (`<select>`), és a sötét/világos mód kapcsolót SVG ikonokkal.
+-   **Dinamikus láthatóság:** A számítási eredményeket tartalmazó szekciók (`#per-meter-results-section`, `#results-total-wrapper`) kapjanak egy `.results-disabled` osztályt, ami vizuálisan jelzi (pl. `opacity: 0.4`), hogy inaktívak, amíg a szükséges adatok nem állnak rendelkezésre.
 
 **2. Adatbázisok (Belső konstansok):**
--   **Anyagsűrűségek:** Egy `MATERIAL_DENSITIES` JS objektum, ami legalább 25+ anyag (acélok, fémek, műanyagok) sűrűségét tartalmazza kg/m³-ben.
+-   **Anyagsűrűségek:** Egy `MATERIAL_DENSITIES` JS objektum, ami legalább 25+ anyag (acélok, fémek, ötvözetek, műanyagok) sűrűségét tartalmazza kg/m³-ben.
 -   **Anyagcsoportok:** Egy `MATERIAL_GROUPS` objektum, ami logikai kategóriákba sorolja az anyagokat (pl. `structuralSteels`, `stainlessSteels`).
--   **Szabványméretek:** Egy `STANDARD_PROFILES` objektum, ami legalább az IPE, HEA, HEB és UNP szelvények szabványos méreteit és a hozzájuk tartozó méretadatokat (magasság, szélesség, gerinc- és övvastagság) tartalmazza.
+-   **Szabványméretek:** Egy `STANDARD_PROFILES` objektum, ami legalább az IPE, HEA, HEB és UNP szelvények szabványos méreteit és a hozzájuk tartozó méretadatokat (magasság `h`, szélesség `w`, gerinc- `t` és övvastagság `s`) tartalmazza.
 -   **Nyelvi fájlok:** Egy `LANG` objektum, ami tartalmazza az összes feliratot legalább magyar (`hu`) és angol (`en`) nyelven.
 
 **3. Bemeneti Paraméterek Panel:**
--   **Anyagválasztó:** Egyedi, JavaScript-alapú legördülő menü, ami a `MATERIAL_GROUPS` alapján csoportosítja az anyagokat. A "Kedvencek" csoport legyen alapból nyitva. Tartalmazzon egy csillag ikont a kedvencnek jelöléshez és egy gombot az "Anyagok kezelése" modális ablak megnyitásához. A kiválasztott anyag sűrűsége jelenjen meg alatta.
--   **Terméktípus választó:** Standard `<select>` elem, ami a terméktípusokat listázza, szintén "Kedvencek" csoporttal. Tartalmazzon csillag ikont a kedvencnek jelöléshez.
--   **Szabványméret választó:** Csak akkor jelenjen meg, ha szabványosított szelvény (pl. I-szelvény) van kiválasztva. A `STANDARD_PROFILES` alapján töltődjön fel. Kiválasztásakor automatikusan töltse ki a méretmezőket. Ha egy méretmezőt manuálisan módosítanak, ez a választó álljon vissza alaphelyzetbe.
+-   **Anyagválasztó:** Egyedi, JavaScript-alapú legördülő menü, ami a `MATERIAL_GROUPS` alapján csoportosítja az anyagokat. A "Kedvencek" csoport legyen alapból nyitva (`expanded`). Tartalmazzon egy csillag ikont a kedvencnek jelöléshez és egy gombot az "Anyagok kezelése" modális ablak megnyitásához. A kiválasztott anyag neve és sűrűsége jelenjen meg a mezőben.
+-   **Terméktípus választó:** Standard `<select>` elem `<optgroup>`-okkal, ami a terméktípusokat listázza, szintén "Kedvencek" csoporttal. Tartalmazzon csillag ikont a kedvencnek jelöléshez.
+-   **Szabványméret választó:** Csak akkor jelenjen meg (`display: block`), ha szabványosított szelvény (pl. I-szelvény, U-szelvény) van kiválasztva. A `STANDARD_PROFILES` alapján töltődjön fel. Kiválasztásakor automatikusan töltse ki a méretmezőket. Ha egy méretmezőt manuálisan módosítanak, ez a választó álljon vissza alaphelyzetbe (`value = ""`).
 -   **Méretmezők:** Dinamikusan generálódjanak a kiválasztott terméktípus alapján.
 
 **4. Eredmények Panel:**
--   **Számítási logika:** A program számolja ki a keresztmetszetet (legyen átváltható mm² és m² között), a méterenkénti tömeget (kg/m), és a méterenkénti felületet (m²/m). Opcionális hossz megadásakor számolja a teljes tömeget és teljes felületet is.
+-   **Számítási logika:** A program számolja ki a keresztmetszetet (legyen átváltható mm² és m² között), a méterenkénti tömeget (kg/m), és a méterenkénti külső felületet (m²/m).
+-   **Szekciók aktiválása:**
+    1.  A "Méterenkénti értékek" szekció és a "Hossz" beviteli mező akkor aktiválódik, ha a méretek alapján a `tömeg/méter` > 0.
+    2.  A "Teljes test értékei" eredményeket tartalmazó szekció (`#results-total-wrapper`) csak akkor aktiválódik, ha a felhasználó a "Hossz" mezőbe 0-nál nagyobb értéket ír.
 -   **Árszámítás:**
     -   Legyen két beviteli mező: `Ár / kg` és `Ár / méter`.
     -   **Kritikus logikai követelmény:** Ha a felhasználó bármelyik mezőbe ír, a másik mezőnek valós időben, gépelés közben frissülnie kell. A számítás alapja egy belső `state.priceHufKg` változó legyen.
     -   **Hibakezelés:** Ha a felhasználó az `Ár / méter` mezőbe ír, mielőtt méretet adott volna meg (azaz a `tömeg/méter` értéke 0), a program **nem omolhat össze**. A `state.priceHufKg` értéke 0 kell, hogy legyen, és nem `Infinity`. A nullával való osztást meg kell előzni.
-    -   **Valutakezelés:** Támogassa a HUF/EUR váltást. Az aktuális árfolyamot kérje le a `https://api.frankfurter.app/` API-ról. Az árfolyam mező mellett legyen egy grafikon ikon. Erre kattintva egy felugró ablakban (popover) jelenjen meg az elmúlt 30 nap árfolyamdiagramja. A valutaváltó gomboknak az összes ármezőt (`Ár/kg`, `Ár/m`, `Teljes ár`) azonnal át kell számolniuk.
--   **Funkciógombok:** Legyen egy "PDF Export" gomb és egy "Pillanatnyi ár mentése" gomb.
+    -   **Valutakezelés:** Támogassa a HUF/EUR váltást. Az aktuális árfolyamot kérje le a `https://api.frankfurter.app/latest?from=EUR&to=HUF` API-ról. Az árfolyam mező mellett legyen egy grafikon ikon. Erre kattintva egy modális ablakban jelenjen meg az elmúlt 30 nap árfolyamdiagramja. A valutaváltó gomboknak (`.unit-toggle`) az összes ármezőt (`Ár/kg`, `Ár/m`, `Teljes ár`) azonnal át kell számolniuk.
+-   **Hossz mértékegység:** A "Hossz" mező mellett legyen egy mértékegység-váltó (`mm`/`m`). A számításnak dinamikusan kell alkalmazkodnia a kiválasztott mértékegységhez.
 
 **5. Haladó Funkciók és Modális Ablakok:**
 -   **Anyagkezelő:** Legyen egy modális ablak, ami lehetővé teszi új anyagok hozzáadását névvel és sűrűséggel, a meglévő egyéni anyagok szerkesztését és törlését. A változások `localStorage`-ba mentődjenek.
--   **Grafikonok és Mentett Árak:**
-    -   **EUR/HUF Árfolyam:** A grafikon legyen esztétikus, színátmenetes feltöltéssel és csökkentett rácsvonalazással. Az adatokat a Frankfurter API `/YYYY-MM-DD..YYYY-MM-DD` végpontjáról kérje le.
-    -   **Mentett Anyagárak:** A "Pillanatnyi ár mentése" gombnak a `state.priceHufKg` értékét kell elmentenie az aktuális dátummal és a kiválasztott anyag nevével a `localStorage`-ba. A gombnak akkor is működnie kell, ha az `Ár / méter` mezőből származik az adat, és a `state.priceHufKg` nem lehet `Infinity`. Az `Ár / kg` és `Ár / méter` mezők alatt legyen egy dinamikus sáv, ami kijelzi a **legutóbb mentett árat** az aktuálisan kiválasztott anyaghoz. Mellette legyen egy grafikon ikon. Erre kattintva egy felugró ablakban jelenjen meg **csak az aktuális anyagra szűrt** ártörténeti grafikon, alatta pedig egy lista a mentett árakról, ahol az egyes bejegyzések **törölhetők**. A törlés után a grafikonnak, a listának és a legutóbbi árat kijelző sávnak is frissülnie kell.
+-   **Grafikonok:**
+    -   **EUR/HUF Árfolyam:** A grafikon legyen esztétikus, `line` típusú, színátmenetes feltöltéssel (`backgroundColor: gradient`) és csökkentett rácsvonalazással. Az adatokat a Frankfurter API `/YYYY-MM-DD..YYYY-MM-DD` végpontjáról kérje le az elmúlt 30 napra.
+-   **localStorage mentés:** Az alkalmazás mentse a felhasználói beállításokat: nyelv, téma, kedvencek (anyag, terméktípus), egyéni anyagok, árfolyam, árak (`state.priceHufKg`), és mértékegység-preferenciák (`crossSectionUnit`, `lengthUnit`).
+
+**6. Dokumentáció:**
+-   **README.md Fájl:** Hozz létre egy `README.md` fájlt, amely részletes leírást és használati útmutatót tartalmaz az alkalmazásról, magyar és angol nyelven egyaránt.
+    -   **Tartalom:** Alkalmazás leírása, főbb funkciók listája (pl. "Kétirányú árszinkronizáció", "Egyedi anyagok", "Dinamikus méretrajzok"), és egy lépésről-lépésre útmutató a használathoz.
+    -   **Formázás:** Használj Markdown formázást a jobb olvashatóság érdekében (címek, listák, félkövér kiemelés).
