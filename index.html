@@ -1,0 +1,1471 @@
+
+<!DOCTYPE html>
+<html lang="hu" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acél tömeg és ár kalkulátor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e4e6eb;
+            --bg-accent: #1877f2;
+            --text-primary: #1c1e21;
+            --text-secondary: #606770;
+            --border-color: #ccd0d5;
+            --highlight-color: #e7f3ff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --industrial-accent: #ffc107;
+            --danger-color: #dc3545;
+            --favorite-color: #ffc107;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #18191a;
+            --bg-secondary: #242526;
+            --bg-tertiary: #3a3b3c;
+            --bg-accent: #2d88ff;
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --border-color: #3e4042;
+            --highlight-color: #3a3b3c;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            font-size: 14px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .header-title h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .control-btn, .lang-select {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.4rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .control-btn:hover {
+            background-color: var(--bg-tertiary);
+        }
+        
+        .control-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .lang-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding-right: 1.8rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23606770' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.4rem center;
+            background-size: 14px;
+        }
+
+        [data-theme="dark"] .lang-select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b0b3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 992px) {
+            main {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px var(--shadow-color);
+            padding: 1rem;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .card-header-icon {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-header-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .card-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 0.8rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        #material-density-display {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            padding: 0.25rem 0.5rem;
+            background-color: var(--bg-primary);
+            border-radius: 4px;
+            margin-top: 0.4rem;
+            text-align: right;
+            max-width: 200px;
+            float: right;
+        }
+
+        .input, .select, .custom-select-display {
+            width: 100%;
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .select-wrapper {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        #product-type-select {
+            max-width: 250px;
+        }
+
+        @media (max-width: 576px) {
+            #product-type-select {
+                max-width: 100%;
+            }
+        }
+        
+        .dimension-input-group .input, #length-input, #eur-huf-rate {
+            max-width: 150px;
+        }
+
+        .input:focus, .select:focus, .custom-select-display:focus {
+            outline: none;
+            border-color: var(--bg-accent);
+            box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+        }
+
+        .dimension-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dimension-input-group .input {
+            text-align: right;
+        }
+
+        .dimension-input-group span {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .dimension-fields-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0.8rem;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.8rem;
+        }
+        
+        .results-section {
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .results-section h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .result-item {
+            background-color: var(--bg-primary);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .result-item-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-bottom: 0.2rem;
+        }
+        
+        .result-item-value {
+            font-size: 1.05rem;
+            font-weight: 600;
+            word-break: break-all;
+        }
+        
+        .result-item-value .unit {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-left: 0.25rem;
+        }
+        
+        .unit-toggle {
+            cursor: pointer;
+            border-bottom: 1px dashed var(--text-secondary);
+            transition: background-color 0.2s, color 0.2s;
+            border-radius: 4px;
+            padding: 0.1rem 0.3rem;
+            font-weight: 600;
+        }
+
+        .unit-toggle:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .currency-panel {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+        
+        .currency-panel .input {
+            text-align: right;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.5rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, opacity 0.2s;
+        }
+        
+        #add-material-form .btn {
+            width: auto;
+            padding: 0.3rem 0.8rem;
+        }
+
+        .btn-primary {
+            background-color: var(--bg-accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            opacity: 0.9;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            max-width: 90%;
+            width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+        }
+        
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .material-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem;
+        }
+        
+        #add-material-form div {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        #add-material-form .input {
+            flex: 1;
+        }
+
+        .material-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .material-list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .material-info {
+           display: flex;
+           align-items: center;
+           gap: 0.75rem;
+        }
+        
+        .material-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: 0.5rem;
+            color: var(--text-secondary);
+            padding: 0.25rem;
+        }
+
+        .material-actions button:hover {
+            color: var(--text-primary);
+        }
+        
+        .favorite-btn, #favorite-toggle-btn, #product-favorite-toggle-btn {
+            color: var(--text-secondary);
+        }
+        .favorite-btn.is-favorite, #favorite-toggle-btn.is-favorite, #product-favorite-toggle-btn.is-favorite {
+            color: var(--favorite-color);
+        }
+        .favorite-btn.is-favorite svg, #favorite-toggle-btn.is-favorite svg, #product-favorite-toggle-btn.is-favorite svg {
+            fill: var(--favorite-color);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+        
+        /* Custom Select */
+        .custom-select-container {
+            position: relative;
+            width: 100%;
+            max-width: 250px;
+        }
+        @media (max-width: 576px) {
+            .custom-select-container {
+                max-width: 100%;
+            }
+        }
+        
+        .custom-select-display {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .custom-select-display::after {
+            content: '▼';
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+        
+        .custom-select-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-top: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            list-style: none;
+        }
+        
+        .custom-select-options.open {
+            display: block;
+        }
+        
+        .custom-select-options .group-header {
+            font-weight: bold;
+            padding: 0.5rem 0.8rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .custom-select-options .group-header::before {
+            content: '►';
+            margin-right: 0.5rem;
+            font-size: 0.6rem;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        
+        .custom-select-options .group-header.expanded::before {
+            transform: rotate(90deg);
+        }
+
+        .custom-select-options .option-list {
+            list-style: none;
+            padding-left: 0;
+            display: none;
+        }
+        
+        .custom-select-options .option-list.expanded {
+            display: block;
+        }
+
+        .custom-select-options .option {
+            padding: 0.5rem 0.8rem 0.5rem 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .custom-select-options .option:hover, .custom-select-options .option.selected {
+            background-color: var(--highlight-color);
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <h1 data-lang-key="title">Acél tömeg és ár kalkulátor</h1>
+            </div>
+            <div class="controls">
+                <select id="lang-selector" class="lang-select"></select>
+                <button id="theme-toggle" class="control-btn" title="Téma váltása">
+                    <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+                <button id="charts-btn" class="control-btn" data-lang-title="chartsTitle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <div class="card">
+                <div class="card-header">
+                     <div class="card-header-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    </div>
+                    <h2 data-lang-key="inputParameters">Bemeneti paraméterek</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label for="material-select" data-lang-key="material">Anyag</label>
+                    <div class="select-wrapper">
+                         <div id="material-select-custom" class="custom-select-container">
+                            <div class="custom-select-display" tabindex="0"></div>
+                            <ul class="custom-select-options"></ul>
+                        </div>
+                        <button id="favorite-toggle-btn" class="control-btn" data-lang-title="toggleFavorite">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        </button>
+                        <button id="manage-materials-btn" class="control-btn" data-lang-title="manageMaterials">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                    </div>
+                     <div id="material-density-display"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="product-type-select" data-lang-key="productType">Terméktípus</label>
+                     <div class="select-wrapper">
+                        <select id="product-type-select" class="select"></select>
+                        <button id="product-favorite-toggle-btn" class="control-btn" data-lang-title="toggleFavorite">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="standard-size-container" class="form-group" style="display: none;">
+                    <label for="standard-size-select" data-lang-key="standardSize">Szabványméret</label>
+                    <select id="standard-size-select" class="select"></select>
+                </div>
+
+                <div id="dimension-fields" class="dimension-fields-container"></div>
+                
+                 <div class="form-group" style="margin-top: 1rem;">
+                    <label for="length" data-lang-key="length">Hossz (opcionális)</label>
+                    <div class="dimension-input-group">
+                        <input type="number" id="length-input" class="input" min="0" step="1">
+                        <span>mm</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                 <div class="card-header">
+                    <div class="card-header-icon">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
+                    </div>
+                    <h2 data-lang-key="results">Számítási eredmények</h2>
+                </div>
+                
+                <div class="results-section">
+                    <h3 data-lang-key="perMeterValues">Méterenkénti értékek</h3>
+                    <div id="results-per-meter" class="results-grid">
+                        <div class="result-item">
+                            <div class="result-item-label" data-lang-key="crossSection">Keresztmetszet</div>
+                            <div class="result-item-value">
+                                <span id="result-cross-section">0</span><span id="cross-section-unit-toggle" class="unit unit-toggle">mm²</span>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-item-label" data-lang-key="weightPerMeter">Tömeg / méter</div>
+                            <div class="result-item-value"><span id="result-weight-meter">0</span><span class="unit"> kg/m</span></div>
+                        </div>
+                         <div class="result-item">
+                            <div class="result-item-label" data-lang-key="surfacePerMeter">Felület / méter</div>
+                            <div class="result-item-value"><span id="result-surface-area">0</span><span class="unit"> m²/m</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                 <div class="results-section">
+                    <h3 data-lang-key="totalBodyValues">Teljes test értékei</h3>
+                    <div id="results-total" class="results-grid">
+                        <div class="result-item">
+                            <div class="result-item-label" data-lang-key="totalWeight">Teljes tömeg</div>
+                            <div class="result-item-value"><span id="result-total-weight">0</span><span class="unit"> kg</span></div>
+                        </div>
+                         <div class="result-item">
+                            <div class="result-item-label" data-lang-key="totalSurface">Teljes felület</div>
+                            <div class="result-item-value"><span id="result-total-surface">0</span><span class="unit"> m²</span></div>
+                        </div>
+                         <div class="result-item">
+                            <div class="result-item-label" data-lang-key="totalPrice">Teljes ár</div>
+                            <div class="result-item-value"><span id="result-total-price">0</span><span class="unit unit-toggle" id="total-price-unit-toggle">HUF</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                     <label data-lang-key="priceCalculation">Árszámítás</label>
+                     <div class="currency-panel">
+                        <input type="number" id="eur-huf-rate" class="input" min="0" step="0.01">
+                        <span>EUR/HUF</span>
+                     </div>
+                </div>
+                
+                <div class="results-grid">
+                    <div class="form-group">
+                        <label for="price-per-kg" data-lang-key="pricePerKg">Ár / kg</label>
+                        <div class="dimension-input-group">
+                            <input type="number" id="price-per-kg" class="input price-input" data-unit="kg" min="0" step="0.01">
+                            <span class="unit unit-toggle" id="price-unit-toggle-kg">HUF</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="price-per-meter" data-lang-key="pricePerMeter">Ár / méter</label>
+                        <div class="dimension-input-group">
+                            <input type="number" id="price-per-meter" class="input price-input" data-unit="m" min="0" step="0.01">
+                             <span class="unit unit-toggle" id="price-unit-toggle-m">HUF</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button id="save-price-btn" class="btn btn-secondary" data-lang-key="savePrice">Pillanatnyi ár mentése</button>
+                    <button id="pdf-export-btn" class="btn btn-primary" data-lang-key="exportPdf">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        PDF exportálás
+                    </button>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <p>&copy; <span id="copyright-year"></span> Acél Kalkulátor. <span data-lang-key="allRightsReserved">Minden jog fenntartva.</span></p>
+        </footer>
+    </div>
+    
+    <!-- Modals -->
+    <div id="materials-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-lang-key="manageMaterials">Anyagok kezelése</h3>
+                <button class="modal-close-btn">&times;</button>
+            </div>
+            <div>
+                <div id="add-material-form">
+                    <h4 data-lang-key="addMaterial" style="margin-bottom: 1rem;">Új anyag hozzáadása</h4>
+                    <div>
+                        <input type="text" id="new-material-name" class="input" data-lang-placeholder="materialName">
+                        <input type="number" id="new-material-density" class="input" data-lang-placeholder="density">
+                        <button id="add-material-btn" class="btn btn-primary" data-lang-key="add">Hozzáad</button>
+                        <input type="hidden" id="editing-material-name">
+                    </div>
+                </div>
+                <h4 data-lang-key="materialList" style="margin-bottom: 1rem;">Anyaglista</h4>
+                <ul id="all-materials-list" class="material-list"></ul>
+            </div>
+        </div>
+    </div>
+    
+    <div id="charts-modal" class="modal-overlay">
+        <div class="modal-content" style="width: 800px; max-width: 95%;">
+             <div class="modal-header">
+                <h3 data-lang-key="chartsTitle">Grafikonok</h3>
+                <button class="modal-close-btn">&times;</button>
+            </div>
+            <div>
+                <div class="form-group">
+                    <h4 data-lang-key="exchangeRateChart">EUR/HUF árfolyam (utolsó 30 nap)</h4>
+                    <canvas id="exchange-rate-chart"></canvas>
+                </div>
+                 <div class="form-group">
+                    <h4 data-lang-key="savedPricesChart">Mentett anyagárak</h4>
+                    <canvas id="saved-prices-chart"></canvas>
+                </div>
+                 <div class="form-group">
+                    <h4 data-lang-key="weightChart">Tömeg/méter alakváltozásra</h4>
+                    <p data-lang-key="weightChartDesc" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">A grafikon azt mutatja, hogyan változik a tömeg, ha egy méretet változtatunk, miközben a többi fix.</p>
+                    <canvas id="weight-dimension-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const MATERIAL_DENSITIES = {
+                "S235": 7850, "S275": 7850, "S355": 7850,
+                "Ezüstacél (1.2210)": 7810,
+                "Rozsdamentes acél 304 (1.4301)": 8000, "Rozsdamentes acél 316 (1.4401)": 8000, "Rozsdamentes acél 430 (1.4016)": 7700,
+                "Szerszámacél D2 (1.2379)": 7700, "Szerszámacél H13 (1.2344)": 7800,
+                "C45 (1.0503)": 7850, "42CrMo4 (1.7225)": 7850, "Hardox 400": 7850,
+                "Alumínium 6061": 2700, "Alumínium 6082": 2710,
+                "Réz": 8960, "Bronz (CuSn8)": 8800, "Sárgaréz (CuZn37)": 8440,
+                "Öntöttvas (szürke)": 7200, "Öntöttvas (gömbgrafitos)": 7150,
+                "Titán (Grade 5)": 4430, "Inconel 718": 8190, "Monel 400": 8800,
+                "Ólom": 11340, "Cink": 7140,
+                "POM (Delrin)": 1410, "PA6": 1140, "PA66": 1150, "PTFE (Teflon)": 2200, "PVC": 1380, "PE-HD": 950
+            };
+            
+            const MATERIAL_GROUPS = {
+                structuralSteels: ["S235", "S275", "S355", "C45", "42CrMo4"],
+                stainlessSteels: ["Rozsdamentes acél 304 (1.4301)", "Rozsdamentes acél 316 (1.4401)", "Rozsdamentes acél 430 (1.4016)"],
+                toolSteels: ["Ezüstacél (1.2210)", "Szerszámacél D2 (1.2379)", "Szerszámacél H13 (1.2344)"],
+                specialSteels: ["Hardox 400"],
+                lightMetals: ["Alumínium 6061", "Alumínium 6082", "Titán (Grade 5)"],
+                nonFerrousMetals: ["Réz", "Bronz (CuSn8)", "Sárgaréz (CuZn37)", "Ólom", "Cink"],
+                castIrons: ["Öntöttvas (szürke)", "Öntöttvas (gömbgrafitos)"],
+                specialAlloys: ["Inconel 718", "Monel 400"],
+                plastics: ["POM (Delrin)", "PA6", "PA66", "PTFE (Teflon)", "PVC", "PE-HD"]
+            };
+            
+            const STANDARD_PROFILES = {
+                iBeam: {
+                    IPE: { "80": {h:80, w:46, t:3.8, s:5.2}, "100": {h:100, w:55, t:4.1, s:5.7}, "120": {h:120, w:64, t:4.4, s:6.3}, "140": {h:140, w:73, t:4.7, s:6.9}, "160": {h:160, w:82, t:5.0, s:7.4}, "180": {h:180, w:91, t:5.3, s:8.0}, "200": {h:200, w:100, t:5.6, s:8.5} },
+                    HEB: { "100": {h:100, w:100, t:6, s:10}, "120": {h:120, w:120, t:6.5, s:11}, "140": {h:140, w:140, t:7, s:12}, "160": {h:160, w:160, t:8, s:13}, "180": {h:180, w:180, t:8.5, s:14}, "200": {h:200, w:200, t:9, s:15} },
+                    HEA: { "100": {h:96, w:100, t:5, s:8}, "120": {h:114, w:120, t:5, s:8}, "140": {h:133, w:140, t:5.5, s:8.5}, "160": {h:152, w:160, t:6, s:9}, "180": {h:171, w:180, t:6, s:9.5}, "200": {h:190, w:200, t:6.5, s:10} }
+                },
+                uChannel: {
+                    UNP: { "80": {h:80, w:45, t:6, s:8}, "100": {h:100, w:50, t:6, s:8.5}, "120": {h:120, w:55, t:7, s:9}, "140": {h:140, w:60, t:7, s:10}, "160": {h:160, w:65, t:7.5, s:10.5}, "180": {h:180, w:70, t:8, s:11}, "200": {h:200, w:75, t:8.5, s:11.5} }
+                }
+            };
+
+            const LANG = {
+                hu: {
+                    title: "Acél tömeg és ár kalkulátor",
+                    inputParameters: "Bemeneti paraméterek",
+                    material: "Anyag", productType: "Terméktípus", results: "Számítási eredmények",
+                    crossSection: "Keresztmetszet", weightPerMeter: "Tömeg / méter", surfacePerMeter: "Felület / méter",
+                    priceCalculation: "Árszámítás", pricePerKg: "Ár / kg", pricePerMeter: "Ár / méter",
+                    exportPdf: "PDF exportálás", allRightsReserved: "Minden jog fenntartva.",
+                    manageMaterials: "Anyagok kezelése", addMaterial: "Új anyag hozzáadása", materialList: "Anyaglista",
+                    materialName: "Anyag neve", density: "Sűrűség", add: "Hozzáad",
+                    customMaterials: "Saját anyagok", favorites: "Kedvencek",
+                    structuralSteels: "Szerkezeti acélok", stainlessSteels: "Rozsdamentes acélok", toolSteels: "Szerszámacélok",
+                    specialSteels: "Különleges acélok", lightMetals: "Könnyűfémek", nonFerrousMetals: "Színesfémek",
+                    castIrons: "Öntöttvasak", specialAlloys: "Speciális ötvözetek", plastics: "Műanyagok",
+                    toggleFavorite: "Kedvencnek jelölés", edit: "Szerkeszt", delete: "Töröl", save: "Ment", cancel: "Mégse",
+                    chartsTitle: "Grafikonok", exchangeRateChart: "EUR/HUF árfolyam (utolsó 30 nap)",
+                    savedPricesChart: "Mentett anyagárak", weightChart: "Tömeg/méter alakváltozásra",
+                    weightChartDesc: "A grafikon azt mutatja, hogyan változik a tömeg, ha egy méretet változtatunk, miközben a többi fix.",
+                    savePrice: "Pillanatnyi ár mentése", priceSaved: "Ár elmentve!",
+                    perMeterValues: "Méterenkénti értékek", totalBodyValues: "Teljes test értékei",
+                    totalWeight: "Teljes tömeg", totalSurface: "Teljes felület", totalPrice: "Teljes ár",
+                    roundBar: "Köracél", squareBar: "Négyzetacél", flatBar: "Laposacél", pipe: "Cső", tube: "Zártszelvény",
+                    solidCylinder: "Tömör henger", solidBlock: "Tömör hasáb", hollowCylinder: "Csőhenger",
+                    specialProfiles: "Szelvények", iBeam: "I-szelvény", uChannel: "U-szelvény", tBeam: "T-szelvény",
+                    standardSize: "Szabványméret", selectSize: "Válassz méretet",
+                    diameter: "Átmérő", sideA: "A oldal", width: "Szélesség", height: "Magasság",
+                    outerDiameter: "Külső átmérő", wallThickness: "Falvastagság", length: "Hossz",
+                    webThickness: "Gerinc vastagság", flangeThickness: "Öv vastagság",
+                    pdfTitle: "Számítási jegyzőkönyv", pdfDate: "Dátum", pdfInputParams: "Bemeneti adatok",
+                    pdfCalcResults: "Számított értékek", pdfDimensions: "Méretek", pdfPriceInfo: "Ár információk",
+                    pdfCurrency: "Valuta", pdfExchangeRate: "Árfolyam",
+                },
+                en: {
+                    title: "Steel Weight & Price Calculator",
+                    inputParameters: "Input Parameters",
+                    material: "Material", productType: "Product Type", results: "Calculation Results",
+                    crossSection: "Cross-section", weightPerMeter: "Weight / meter", surfacePerMeter: "Surface / meter",
+                    priceCalculation: "Price Calculation", pricePerKg: "Price / kg", pricePerMeter: "Price / meter",
+                    exportPdf: "Export to PDF", allRightsReserved: "All rights reserved.",
+                    manageMaterials: "Manage Materials", addMaterial: "Add New Material", materialList: "Material List",
+                    materialName: "Material Name", density: "Density", add: "Add", customMaterials: "Custom Materials",
+                    favorites: "Favorites", structuralSteels: "Structural Steels", stainlessSteels: "Stainless Steels",
+                    toolSteels: "Tool Steels", specialSteels: "Special Steels", lightMetals: "Light Metals",
+                    nonFerrousMetals: "Non-Ferrous Metals", castIrons: "Cast Irons", specialAlloys: "Special Alloys",
+                    plastics: "Plastics", toggleFavorite: "Toggle Favorite", edit: "Edit", delete: "Delete", save: "Save", cancel: "Cancel",
+                    chartsTitle: "Charts", exchangeRateChart: "EUR/HUF Exchange Rate (last 30 days)",
+                    savedPricesChart: "Saved Material Prices", weightChart: "Weight/meter on Dimension Change",
+                    weightChartDesc: "This chart shows how weight changes when one dimension is altered while others are fixed.",
+                    savePrice: "Save Current Price", priceSaved: "Price saved!",
+                    perMeterValues: "Values Per Meter", totalBodyValues: "Total Body Values",
+                    totalWeight: "Total Weight", totalSurface: "Total Surface", totalPrice: "Total Price",
+                    roundBar: "Round Bar", squareBar: "Square Bar", flatBar: "Flat Bar", pipe: "Pipe", tube: "Tube",
+                    solidCylinder: "Solid Cylinder", solidBlock: "Solid Block", hollowCylinder: "Hollow Cylinder",
+                    specialProfiles: "Profiles", iBeam: "I-Beam", uChannel: "U-Channel", tBeam: "T-Beam",
+                    standardSize: "Standard Size", selectSize: "Select a size",
+                    diameter: "Diameter", sideA: "Side A", width: "Width", height: "Height",
+                    outerDiameter: "Outer Diameter", wallThickness: "Wall Thickness", length: "Length",
+                    webThickness: "Web Thickness", flangeThickness: "Flange Thickness",
+                    pdfTitle: "Calculation Report", pdfDate: "Date", pdfInputParams: "Input Data",
+                    pdfCalcResults: "Calculated Values", pdfDimensions: "Dimensions", pdfPriceInfo: "Price Information",
+                    pdfCurrency: "Currency", pdfExchangeRate: "Exchange Rate",
+                }
+            };
+
+            const PRODUCT_TYPES = {
+                roundBar: { dims: [{ id: 'diameter', unit: 'mm' }] },
+                squareBar: { dims: [{ id: 'sideA', unit: 'mm' }] },
+                flatBar: { dims: [{ id: 'width', unit: 'mm' }, { id: 'height', unit: 'mm' }] },
+                pipe: { dims: [{ id: 'outerDiameter', unit: 'mm' }, { id: 'wallThickness', unit: 'mm' }] },
+                tube: { dims: [{ id: 'width', unit: 'mm' }, { id: 'height', unit: 'mm' }, { id: 'wallThickness', unit: 'mm' }] },
+                iBeam: { dims: [{id: 'height', unit: 'mm'}, {id: 'width', unit: 'mm'}, {id: 'webThickness', unit: 'mm', key: 't'}, {id: 'flangeThickness', unit: 'mm', key: 's'}] },
+                uChannel: { dims: [{id: 'height', unit: 'mm'}, {id: 'width', unit: 'mm'}, {id: 'webThickness', unit: 'mm', key: 't'}, {id: 'flangeThickness', unit: 'mm', key: 's'}] },
+                tBeam: { dims: [{id: 'height', unit: 'mm'}, {id: 'width', unit: 'mm'}, {id: 'webThickness', unit: 'mm'}, {id: 'flangeThickness', unit: 'mm'}] },
+            };
+
+            let state = {
+                lang: 'hu', theme: 'dark', eurHufRate: 400.0, priceCurrency: 'HUF',
+                customMaterials: {}, favorites: [], productFavorites: [], savedPrices: [],
+                crossSectionUnit: 'mm2', selectedMaterial: null,
+                charts: { exchangeRate: null, savedPrices: null, weightDimension: null }
+            };
+            
+            const DOMElements = {
+                langSelector: document.getElementById('lang-selector'),
+                themeToggle: document.getElementById('theme-toggle'),
+                themeIconSun: document.getElementById('theme-icon-sun'),
+                themeIconMoon: document.getElementById('theme-icon-moon'),
+                materialSelectContainer: document.getElementById('material-select-custom'),
+                materialSelectDisplay: document.querySelector('#material-select-custom .custom-select-display'),
+                materialSelectOptions: document.querySelector('#material-select-custom .custom-select-options'),
+                materialDensityDisplay: document.getElementById('material-density-display'),
+                favoriteToggleBtn: document.getElementById('favorite-toggle-btn'),
+                productTypeSelect: document.getElementById('product-type-select'),
+                productFavoriteToggleBtn: document.getElementById('product-favorite-toggle-btn'),
+                standardSizeContainer: document.getElementById('standard-size-container'),
+                standardSizeSelect: document.getElementById('standard-size-select'),
+                dimensionFields: document.getElementById('dimension-fields'),
+                lengthInput: document.getElementById('length-input'),
+                resultCrossSection: document.getElementById('result-cross-section'),
+                crossSectionUnitToggle: document.getElementById('cross-section-unit-toggle'),
+                resultWeightMeter: document.getElementById('result-weight-meter'),
+                resultSurfaceArea: document.getElementById('result-surface-area'),
+                resultTotalWeight: document.getElementById('result-total-weight'),
+                resultTotalSurface: document.getElementById('result-total-surface'),
+                resultTotalPrice: document.getElementById('result-total-price'),
+                totalPriceUnitToggle: document.getElementById('total-price-unit-toggle'),
+                eurHufRate: document.getElementById('eur-huf-rate'),
+                pricePerKg: document.getElementById('price-per-kg'),
+                pricePerMeter: document.getElementById('price-per-meter'),
+                priceUnitToggleKg: document.getElementById('price-unit-toggle-kg'),
+                priceUnitToggleM: document.getElementById('price-unit-toggle-m'),
+                pdfExportBtn: document.getElementById('pdf-export-btn'),
+                manageMaterialsBtn: document.getElementById('manage-materials-btn'),
+                materialsModal: document.getElementById('materials-modal'),
+                chartsBtn: document.getElementById('charts-btn'),
+                chartsModal: document.getElementById('charts-modal'),
+                savePriceBtn: document.getElementById('save-price-btn'),
+                newMaterialName: document.getElementById('new-material-name'),
+                newMaterialDensity: document.getElementById('new-material-density'),
+                addMaterialBtn: document.getElementById('add-material-btn'),
+                allMaterialsList: document.getElementById('all-materials-list'),
+                editingMaterialName: document.getElementById('editing-material-name'),
+                copyrightYear: document.getElementById('copyright-year')
+            };
+
+            const storage = {
+                saveState: () => {
+                    localStorage.setItem('steelCalcState', JSON.stringify({
+                        ...state,
+                        charts: {} // Don't save chart instances
+                    }));
+                },
+                loadState: () => {
+                    const saved = localStorage.getItem('steelCalcState');
+                    if (saved) {
+                        const loadedState = JSON.parse(saved);
+                        if (!Array.isArray(loadedState.favorites)) loadedState.favorites = [];
+                        if (!Array.isArray(loadedState.productFavorites)) loadedState.productFavorites = [];
+                        Object.assign(state, loadedState);
+                    }
+                }
+            };
+            
+            async function fetchExchangeRate() {
+                try {
+                    const response = await fetch('https://api.frankfurter.app/latest?from=EUR&to=HUF');
+                    if (!response.ok) throw new Error('Network response not ok');
+                    const data = await response.json();
+                    if (data.rates && data.rates.HUF) {
+                        state.eurHufRate = data.rates.HUF;
+                        DOMElements.eurHufRate.value = state.eurHufRate.toFixed(2);
+                        storage.saveState();
+                        calculate();
+                    }
+                } catch (error) {
+                    console.error('Could not fetch exchange rate, using stored value.', error);
+                }
+            }
+
+            function openModal(modal) { modal.classList.add('active'); }
+            function closeModal(modal) { modal.classList.remove('active'); }
+
+            function setLanguage(lang) {
+                if (!LANG[lang]) lang = LANG['en'] ? 'en' : 'hu';
+                state.lang = lang;
+                DOMElements.langSelector.value = lang;
+                document.documentElement.lang = lang;
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.getAttribute('data-lang-key');
+                    if (LANG[lang][key]) el.innerText = LANG[lang][key];
+                });
+                document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
+                    const key = el.getAttribute('data-lang-placeholder');
+                    if (LANG[lang][key]) el.placeholder = LANG[lang][key];
+                });
+                document.querySelectorAll('[data-lang-title]').forEach(el => {
+                    const key = el.getAttribute('data-lang-title');
+                     if (LANG[lang][key]) el.title = LANG[lang][key];
+                });
+                populateProductTypeSelect();
+                populateMaterialSelect();
+                updateDimensionFields();
+                storage.saveState();
+            }
+
+            function applyTheme(theme) {
+                state.theme = theme;
+                document.documentElement.setAttribute('data-theme', theme);
+                DOMElements.themeIconSun.style.display = theme === 'dark' ? 'none' : 'block';
+                DOMElements.themeIconMoon.style.display = theme === 'dark' ? 'block' : 'none';
+                storage.saveState();
+            }
+            
+            function populateMaterialSelect() {
+                DOMElements.materialSelectOptions.innerHTML = '';
+                const allMaterials = { ...MATERIAL_DENSITIES, ...state.customMaterials };
+                const createOption = (key) => {
+                    const li = document.createElement('li');
+                    li.className = 'option';
+                    li.dataset.value = key;
+                    li.textContent = key;
+                    return li;
+                };
+
+                const createGroup = (labelKey, keys, isExpanded = false) => {
+                    const groupLi = document.createElement('li');
+                    const header = document.createElement('div');
+                    header.className = 'group-header';
+                    header.textContent = LANG[state.lang][labelKey] || labelKey;
+                    
+                    const optionList = document.createElement('ul');
+                    optionList.className = 'option-list';
+                    
+                    keys.sort((a,b) => a.localeCompare(b)).forEach(key => {
+                        if (allMaterials[key]) optionList.appendChild(createOption(key));
+                    });
+
+                    if (optionList.childElementCount > 0) {
+                        if (isExpanded) {
+                            header.classList.add('expanded');
+                            optionList.classList.add('expanded');
+                        }
+                        groupLi.appendChild(header);
+                        groupLi.appendChild(optionList);
+                        DOMElements.materialSelectOptions.appendChild(groupLi);
+                    }
+                };
+                
+                createGroup('favorites', state.favorites, true); // Favorites expanded by default
+                createGroup('customMaterials', Object.keys(state.customMaterials).filter(k => !state.favorites.includes(k)));
+                Object.keys(MATERIAL_GROUPS).forEach(groupKey => {
+                    const members = MATERIAL_GROUPS[groupKey].filter(k => !state.favorites.includes(k));
+                    if(members.length > 0) createGroup(groupKey, members);
+                });
+                
+                const initialMaterial = state.selectedMaterial && allMaterials[state.selectedMaterial] 
+                    ? state.selectedMaterial 
+                    : (state.favorites[0] || Object.keys(allMaterials)[0]);
+                
+                selectMaterial(initialMaterial);
+            }
+
+            function selectMaterial(materialName) {
+                if (!materialName) return;
+                state.selectedMaterial = materialName;
+                DOMElements.materialSelectDisplay.textContent = materialName;
+                
+                DOMElements.materialSelectOptions.querySelectorAll('.option.selected').forEach(el => el.classList.remove('selected'));
+                const optionEl = DOMElements.materialSelectOptions.querySelector(`.option[data-value="${materialName}"]`);
+                if(optionEl) optionEl.classList.add('selected');
+
+                updateMaterialDensityDisplay();
+                updateFavoriteButtonState();
+                calculate();
+                storage.saveState();
+            }
+
+            function updateMaterialDensityDisplay() {
+                const materialName = state.selectedMaterial;
+                const allMaterials = { ...MATERIAL_DENSITIES, ...state.customMaterials };
+                const density = allMaterials[materialName];
+                DOMElements.materialDensityDisplay.innerText = density ? `${LANG[state.lang].density}: ${density} kg/m³` : '';
+            }
+
+            function updateFavoriteButtonState() {
+                DOMElements.favoriteToggleBtn.classList.toggle('is-favorite', state.favorites.includes(state.selectedMaterial));
+            }
+            
+            function populateProductTypeSelect() {
+                const currentVal = DOMElements.productTypeSelect.value;
+                DOMElements.productTypeSelect.innerHTML = '';
+                const specialProfiles = ['iBeam', 'uChannel', 'tBeam'];
+
+                const createOption = (key) => {
+                    const option = document.createElement('option');
+                    option.value = key; option.innerText = LANG[state.lang][key] || key;
+                    return option;
+                };
+                
+                const createGroup = (labelKey, keys) => {
+                    const group = document.createElement('optgroup');
+                    group.label = LANG[state.lang][labelKey] || labelKey;
+                    keys.forEach(key => group.appendChild(createOption(key)));
+                    if(group.childElementCount > 0) DOMElements.productTypeSelect.appendChild(group);
+                };
+                
+                createGroup('favorites', state.productFavorites);
+                createGroup('specialProfiles', specialProfiles.filter(p => !state.productFavorites.includes(p)));
+                createGroup('productType', Object.keys(PRODUCT_TYPES).filter(p => !specialProfiles.includes(p) && !state.productFavorites.includes(p)));
+                
+                DOMElements.productTypeSelect.value = currentVal || state.productFavorites[0] || 'roundBar';
+                updateProductFavoriteButtonState();
+            }
+
+            function updateProductFavoriteButtonState() {
+                const currentProduct = DOMElements.productTypeSelect.value;
+                DOMElements.productFavoriteToggleBtn.classList.toggle('is-favorite', state.productFavorites.includes(currentProduct));
+            }
+
+            function updateDimensionFields() {
+                const productType = DOMElements.productTypeSelect.value;
+                const config = PRODUCT_TYPES[productType];
+                if (!config) return;
+                
+                DOMElements.dimensionFields.innerHTML = '';
+                config.dims.forEach(({ id, unit }) => {
+                    const formGroup = document.createElement('div');
+                    formGroup.className = 'form-group';
+                    formGroup.innerHTML = `
+                        <label for="dim-${id}">${LANG[state.lang][id] || id}</label>
+                        <div class="dimension-input-group">
+                            <input type="number" id="dim-${id}" class="input dimension-input" min="0" step="0.1">
+                            <span>${unit}</span>
+                        </div>
+                    `;
+                    DOMElements.dimensionFields.appendChild(formGroup);
+                });
+                
+                updateStandardSizeSelector(productType);
+                calculate();
+            }
+
+            function updateStandardSizeSelector(productType) {
+                const profileData = STANDARD_PROFILES[productType];
+                if(profileData) {
+                    DOMElements.standardSizeContainer.style.display = 'block';
+                    DOMElements.standardSizeSelect.innerHTML = `<option value="">${LANG[state.lang].selectSize}</option>`;
+                    Object.entries(profileData).forEach(([series, sizes]) => {
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = series;
+                        Object.keys(sizes).forEach(size => {
+                             const option = document.createElement('option');
+                             option.value = `${series}-${size}`;
+                             option.textContent = `${series}-${size}`;
+                             optgroup.appendChild(option);
+                        });
+                        DOMElements.standardSizeSelect.appendChild(optgroup);
+                    });
+                } else {
+                    DOMElements.standardSizeContainer.style.display = 'none';
+                }
+            }
+            
+            function fillDimensionsFromStandardSize() {
+                const value = DOMElements.standardSizeSelect.value;
+                if(!value) return;
+                
+                const [series, size] = value.split('-');
+                const productType = DOMElements.productTypeSelect.value;
+                const dims = STANDARD_PROFILES[productType]?.[series]?.[size];
+                
+                if(dims) {
+                    PRODUCT_TYPES[productType].dims.forEach(dimConfig => {
+                        const key = dimConfig.key || dimConfig.id;
+                        const input = document.getElementById(`dim-${dimConfig.id}`);
+                        if(input && dims[key] !== undefined) {
+                            input.value = dims[key];
+                        }
+                    });
+                    calculate();
+                }
+            }
+            
+            function getDimensions() {
+                const values = {};
+                document.querySelectorAll('.dimension-input').forEach(input => {
+                    values[input.id.replace('dim-', '')] = parseFloat(input.value) || 0;
+                });
+                return values;
+            }
+            
+            function calculateCrossSection(type, dims) {
+                const { diameter, sideA, width, height, outerDiameter, wallThickness, webThickness, flangeThickness } = dims;
+                const pi = Math.PI;
+                switch (type) {
+                    case 'roundBar': case 'solidCylinder': return (pi * diameter ** 2) / 4;
+                    case 'squareBar': return sideA ** 2;
+                    case 'flatBar': case 'solidBlock': return width * height;
+                    case 'pipe': case 'hollowCylinder': {
+                        const d = outerDiameter - 2 * wallThickness; return d > 0 ? (pi / 4) * (outerDiameter**2 - d**2) : 0;
+                    }
+                    case 'tube': {
+                        const w = width - 2 * wallThickness; const h = height - 2 * wallThickness; return (w > 0 && h > 0) ? (width * height) - (w * h) : 0;
+                    }
+                    case 'iBeam': return (width * flangeThickness * 2) + ((height - 2 * flangeThickness) * webThickness);
+                    case 'uChannel': return (height * webThickness) + (2 * (width - webThickness) * flangeThickness);
+                    case 'tBeam': return (width * flangeThickness) + ((height - flangeThickness) * webThickness);
+                    default: return 0;
+                }
+            }
+
+            function calculateSurfaceAreaPerMeter(type, dims) {
+                const { diameter, sideA, width, height, outerDiameter, webThickness, flangeThickness } = dims;
+                if (Object.values(dims).some(d => d <= 0)) return 0;
+                let perimeterMm = 0;
+                switch (type) {
+                    case 'roundBar': case 'solidCylinder': case 'pipe': case 'hollowCylinder': perimeterMm = Math.PI * (outerDiameter || diameter); break;
+                    case 'squareBar': perimeterMm = 4 * sideA; break;
+                    case 'flatBar': case 'solidBlock': case 'tube': perimeterMm = 2 * (width + height); break;
+                    case 'iBeam': perimeterMm = 4 * width + 2 * height - 2 * webThickness; break;
+                    case 'uChannel': perimeterMm = 2 * width + 2 * height; break;
+                    case 'tBeam': perimeterMm = 2 * width + 2 * height; break;
+                }
+                return perimeterMm / 1000;
+            }
+            
+            let priceUpdateLock = false;
+            
+            function calculate() {
+                const productType = DOMElements.productTypeSelect.value;
+                const materialName = state.selectedMaterial;
+                const allMaterials = { ...MATERIAL_DENSITIES, ...state.customMaterials };
+                const density = allMaterials[materialName];
+                const dims = getDimensions();
+                const lengthMm = parseFloat(DOMElements.lengthInput.value) || 0;
+                const lengthM = lengthMm / 1000;
+
+                const crossSectionMm2 = calculateCrossSection(productType, dims);
+                const weightPerMeter = crossSectionMm2 / 1000000 * density;
+                const surfaceAreaPerMeter = calculateSurfaceAreaPerMeter(productType, dims);
+                
+                DOMElements.resultCrossSection.innerText = (state.crossSectionUnit === 'm2') ? (crossSectionMm2 / 1000000).toExponential(3) : crossSectionMm2.toFixed(2);
+                DOMElements.crossSectionUnitToggle.innerText = (state.crossSectionUnit === 'm2') ? 'm²' : 'mm²';
+                DOMElements.resultWeightMeter.innerText = weightPerMeter.toFixed(3);
+                DOMElements.resultSurfaceArea.innerText = surfaceAreaPerMeter.toFixed(4);
+                DOMElements.resultTotalWeight.innerText = (weightPerMeter * lengthM).toFixed(3);
+                const endCapAreaM2 = 2 * (crossSectionMm2 / 1000000);
+                DOMElements.resultTotalSurface.innerText = (surfaceAreaPerMeter * lengthM + endCapAreaM2).toFixed(4);
+                
+                updatePriceDisplay();
+            }
+            
+            function calculatePrices(sourceEl = null) {
+                if (priceUpdateLock) return;
+                priceUpdateLock = true;
+                const weightPerMeter = parseFloat(DOMElements.resultWeightMeter.innerText) || 0;
+                const rate = state.eurHufRate;
+                let valueInHufKg = 0;
+                if (sourceEl) {
+                    const value = parseFloat(sourceEl.value) || 0;
+                    const unit = sourceEl.dataset.unit;
+                    if (unit === 'kg') {
+                        valueInHufKg = state.priceCurrency === 'HUF' ? value : value * rate;
+                    } else if (unit === 'm' && weightPerMeter > 0) {
+                        const valuePerMeter = state.priceCurrency === 'HUF' ? value : value * rate;
+                        valueInHufKg = valuePerMeter / weightPerMeter;
+                    }
+                    DOMElements.pricePerKg.dataset.valueHuf = valueInHufKg;
+                }
+                updatePriceDisplay();
+                priceUpdateLock = false;
+            }
+
+            function updatePriceDisplay() {
+                const weightPerMeter = parseFloat(DOMElements.resultWeightMeter.innerText) || 0;
+                const rate = state.eurHufRate;
+                const lengthM = (parseFloat(DOMElements.lengthInput.value) || 0) / 1000;
+                const valueHufKg = parseFloat(DOMElements.pricePerKg.dataset.valueHuf) || 0;
+                
+                const valuePerKg = state.priceCurrency === 'HUF' ? valueHufKg : valueHufKg / rate;
+                const valuePerMeter = valuePerKg * weightPerMeter;
+
+                if (document.activeElement !== DOMElements.pricePerKg) {
+                   DOMElements.pricePerKg.value = valuePerKg > 0 ? valuePerKg.toFixed(2) : '';
+                }
+                if (document.activeElement !== DOMElements.pricePerMeter) {
+                   DOMElements.pricePerMeter.value = valuePerMeter > 0 ? valuePerMeter.toFixed(2) : '';
+                }
+                
+                const totalPrice = valueHufKg * weightPerMeter * lengthM;
+                DOMElements.resultTotalPrice.innerText = state.priceCurrency === 'HUF' 
+                    ? totalPrice.toFixed(2)
+                    : (totalPrice / rate).toFixed(2);
+
+                [DOMElements.priceUnitToggleKg, DOMElements.priceUnitToggleM, DOMElements.totalPriceUnitToggle].forEach(el => el.innerText = state.priceCurrency);
+            }
+
+            function handleAddOrUpdateMaterial() {
+                const name = DOMElements.newMaterialName.value.trim();
+                const density = parseFloat(DOMElements.newMaterialDensity.value);
+                const editingName = DOMElements.editingMaterialName.value;
+
+                if (!name || !density || density <= 0) {
+                    alert('Érvénytelen név vagy sűrűség!');
+                    return;
+                }
+                
+                if (editingName && editingName !== name) {
+                    delete state.customMaterials[editingName];
+                    const favIndex = state.favorites.indexOf(editingName);
+                    if (favIndex > -1) state.favorites[favIndex] = name;
+                }
+
+                state.customMaterials[name] = density;
+                storage.saveState();
+                renderAllMaterialsList();
+                populateMaterialSelect();
+                DOMElements.newMaterialName.value = DOMElements.newMaterialDensity.value = DOMElements.editingMaterialName.value = '';
+                DOMElements.addMaterialBtn.innerText = LANG[state.lang].add;
+            }
+
+            function renderAllMaterialsList() {
+                DOMElements.allMaterialsList.innerHTML = '';
+                const lang = state.lang;
+                const allMaterials = { ...state.customMaterials, ...MATERIAL_DENSITIES };
+                Object.keys(allMaterials).sort((a,b) => a.localeCompare(b)).forEach(name => {
+                    const isCustom = !!state.customMaterials[name];
+                    const isFavorite = state.favorites.includes(name);
+                    const li = document.createElement('li');
+                    li.className = 'material-list-item';
+                    li.innerHTML = `
+                        <div class="material-info">
+                             <button class="favorite-btn ${isFavorite ? 'is-favorite' : ''}" data-name="${name}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </button>
+                            <span><strong>${name}</strong> (${allMaterials[name]} kg/m³)</span>
+                        </div>
+                        <div class="material-actions">
+                           ${isCustom ? `
+                           <button class="edit-material-btn" data-name="${name}" title="${LANG[lang].edit}"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                           <button class="delete-material-btn" data-name="${name}" title="${LANG[lang].delete}"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                           ` : ''}
+                        </div>`;
+                    DOMElements.allMaterialsList.appendChild(li);
+                });
+            }
+
+            function init() {
+                storage.loadState();
+                Object.keys(LANG).forEach(lang => {
+                    const option = document.createElement('option');
+                    option.value = lang; option.innerText = lang.toUpperCase();
+                    DOMElements.langSelector.appendChild(option);
+                });
+                const browserLang = navigator.language.split('-')[0];
+                setLanguage(state.lang || (LANG[browserLang] ? browserLang : 'hu'));
+                applyTheme(state.theme);
+                DOMElements.eurHufRate.value = state.eurHufRate.toFixed(2);
+                DOMElements.copyrightYear.textContent = Math.max(2026, new Date().getFullYear());
+                fetchExchangeRate();
+            }
+
+            // --- EVENT LISTENERS ---
+            DOMElements.langSelector.addEventListener('change', (e) => setLanguage(e.target.value));
+            DOMElements.themeToggle.addEventListener('click', () => applyTheme(state.theme === 'light' ? 'dark' : 'light'));
+            DOMElements.crossSectionUnitToggle.addEventListener('click', () => {
+                state.crossSectionUnit = state.crossSectionUnit === 'mm2' ? 'm2' : 'mm2';
+                storage.saveState();
+                calculate();
+            });
+            DOMElements.favoriteToggleBtn.addEventListener('click', () => toggleFavorite(state.selectedMaterial, 'material'));
+            DOMElements.productFavoriteToggleBtn.addEventListener('click', () => toggleFavorite(DOMElements.productTypeSelect.value, 'product'));
+            
+            DOMElements.materialSelectDisplay.addEventListener('click', () => DOMElements.materialSelectOptions.classList.toggle('open'));
+            document.addEventListener('click', (e) => {
+                if (!DOMElements.materialSelectContainer.contains(e.target)) {
+                     DOMElements.materialSelectOptions.classList.remove('open');
+                }
+            });
+            DOMElements.materialSelectOptions.addEventListener('click', (e) => {
+                if(e.target.classList.contains('group-header')) {
+                    e.target.classList.toggle('expanded');
+                    e.target.nextElementSibling.classList.toggle('expanded');
+                } else if(e.target.classList.contains('option')) {
+                    selectMaterial(e.target.dataset.value);
+                    DOMElements.materialSelectOptions.classList.remove('open');
+                }
+            });
+
+            DOMElements.productTypeSelect.addEventListener('change', () => {
+                updateDimensionFields();
+                updateProductFavoriteButtonState();
+            });
+            
+            DOMElements.standardSizeSelect.addEventListener('change', fillDimensionsFromStandardSize);
+            
+            document.querySelector('.card').addEventListener('input', (e) => {
+                if (e.target.matches('.dimension-input') || e.target.id === 'length-input') {
+                    if (e.target.matches('.dimension-input')) {
+                        DOMElements.standardSizeSelect.value = "";
+                    }
+                    calculate();
+                } else if(e.target.matches('.price-input')){
+                    calculatePrices(e.target);
+                }
+            });
+
+            DOMElements.eurHufRate.addEventListener('input', (e) => {
+                state.eurHufRate = parseFloat(e.target.value) || 0;
+                storage.saveState();
+                calculate();
+            });
+            
+            [DOMElements.priceUnitToggleKg, DOMElements.priceUnitToggleM, DOMElements.totalPriceUnitToggle].forEach(el => el.addEventListener('click', () => {
+                state.priceCurrency = state.priceCurrency === 'HUF' ? 'EUR' : 'HUF';
+                storage.saveState();
+                updatePriceDisplay();
+            }));
+
+            DOMElements.manageMaterialsBtn.addEventListener('click', () => { renderAllMaterialsList(); openModal(DOMElements.materialsModal); });
+            DOMElements.addMaterialBtn.addEventListener('click', handleAddOrUpdateMaterial);
+            DOMElements.materialsModal.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal-overlay') || e.target.classList.contains('modal-close-btn')) closeModal(DOMElements.materialsModal);
+            });
+            DOMElements.allMaterialsList.addEventListener('click', (e) => {
+                const favoriteBtn = e.target.closest('.favorite-btn');
+                const editBtn = e.target.closest('.edit-material-btn');
+                const deleteBtn = e.target.closest('.delete-material-btn');
+                if (favoriteBtn) { toggleFavorite(favoriteBtn.dataset.name, 'material'); renderAllMaterialsList(); }
+                if (editBtn) {
+                     const name = editBtn.dataset.name;
+                     DOMElements.newMaterialName.value = name;
+                     DOMElements.newMaterialDensity.value = state.customMaterials[name];
+                     DOMElements.editingMaterialName.value = name;
+                     DOMElements.addMaterialBtn.innerText = LANG[state.lang].save;
+                }
+                if (deleteBtn) {
+                    const name = deleteBtn.dataset.name;
+                    if (confirm(`Biztosan törli a(z) "${name}" anyagot?`)) {
+                        delete state.customMaterials[name];
+                        state.favorites = state.favorites.filter(fav => fav !== name);
+                        storage.saveState();
+                        renderAllMaterialsList();
+                        populateMaterialSelect();
+                    }
+                }
+            });
+
+            DOMElements.chartsBtn.addEventListener('click', () => openModal(DOMElements.chartsModal));
+            DOMElements.chartsModal.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal-overlay') || e.target.classList.contains('modal-close-btn')) closeModal(DOMElements.chartsModal);
+            });
+
+            DOMElements.savePriceBtn.addEventListener('click', () => {
+                const materialName = state.selectedMaterial;
+                const valueHufKg = parseFloat(DOMElements.pricePerKg.dataset.valueHuf) || 0;
+                if (materialName && valueHufKg > 0) {
+                    state.savedPrices.push({
+                        date: new Date().toISOString().split('T')[0],
+                        material: materialName,
+                        price: valueHufKg
+                    });
+                    storage.saveState();
+                    const originalText = DOMElements.savePriceBtn.textContent;
+                    DOMElements.savePriceBtn.textContent = LANG[state.lang].priceSaved;
+                    setTimeout(() => { DOMElements.savePriceBtn.textContent = originalText; }, 2000);
+                }
+            });
+            
+            function toggleFavorite(name, type = 'material') {
+                const favArray = type === 'material' ? state.favorites : state.productFavorites;
+                const favIndex = favArray.indexOf(name);
+                if (favIndex > -1) favArray.splice(favIndex, 1);
+                else favArray.push(name);
+                storage.saveState();
+
+                if(type === 'material') {
+                    populateMaterialSelect();
+                    updateFavoriteButtonState();
+                } else {
+                    populateProductTypeSelect();
+                }
+            }
+            
+            init();
+        });
+    </script>
+</body>
+</html>

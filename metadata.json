@@ -1,0 +1,5 @@
+{
+  "name": "Acél tömeg és ár kalkulátor",
+  "description": "Egy reszponzív, modern, ipari jellegű webalkalmazás acél, fém és ötvözet termékek tömegének és árának számításához, dinamikus méretrajzokkal, valuta-kezeléssel, PDF exporttal és többnyelvű támogatással.",
+  "requestFramePermissions": []
+}
