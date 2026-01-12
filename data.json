@@ -1,0 +1,98 @@
+{
+  "MATERIAL_DENSITIES": {
+    "S235": 7850, "S275": 7850, "S355": 7850,
+    "Ezüstacél (1.2210)": 7810,
+    "Rozsdamentes acél 304 (1.4301)": 8000, "Rozsdamentes acél 316 (1.4401)": 8000, "Rozsdamentes acél 430 (1.4016)": 7700,
+    "Szerszámacél D2 (1.2379)": 7700, "Szerszámacél H13 (1.2344)": 7800,
+    "C45 (1.0503)": 7850, "42CrMo4 (1.7225)": 7850, "Hardox 400": 7850,
+    "Alumínium 6061": 2700, "Alumínium 6082": 2710, "Alumínium 7075": 2810,
+    "Réz": 8960, "Bronz (CuSn8)": 8800, "Sárgaréz (CuZn37)": 8440,
+    "Öntöttvas (szürke)": 7200, "Öntöttvas (gömbgrafitos)": 7150,
+    "Titán (Grade 5)": 4430, "Inconel 718": 8190, "Monel 400": 8800,
+    "Ólom": 11340, "Cink": 7140, "Magnézium": 1740,
+    "POM (Delrin)": 1410, "PA6": 1140, "PA66": 1150, "PTFE (Teflon)": 2200, "PVC": 1380, "PE-HD": 950
+  },
+  "MATERIAL_GROUPS": {
+    "structuralSteels": ["S235", "S275", "S355", "C45", "42CrMo4"],
+    "stainlessSteels": ["Rozsdamentes acél 304 (1.4301)", "Rozsdamentes acél 316 (1.4401)", "Rozsdamentes acél 430 (1.4016)"],
+    "toolSteels": ["Ezüstacél (1.2210)", "Szerszámacél D2 (1.2379)", "Szerszámacél H13 (1.2344)"],
+    "specialSteels": ["Hardox 400"],
+    "lightMetals": ["Alumínium 6061", "Alumínium 6082", "Alumínium 7075", "Titán (Grade 5)", "Magnézium"],
+    "nonFerrousMetals": ["Réz", "Bronz (CuSn8)", "Sárgaréz (CuZn37)", "Ólom", "Cink"],
+    "castIrons": ["Öntöttvas (szürke)", "Öntöttvas (gömbgrafitos)"],
+    "specialAlloys": ["Inconel 718", "Monel 400"],
+    "plastics": ["POM (Delrin)", "PA6", "PA66", "PTFE (Teflon)", "PVC", "PE-HD"]
+  },
+  "STANDARD_PROFILES": {
+    "iBeam": {
+      "IPE": { "80": { "h": 80, "w": 46, "t": 3.8, "s": 5.2 }, "100": { "h": 100, "w": 55, "t": 4.1, "s": 5.7 }, "120": { "h": 120, "w": 64, "t": 4.4, "s": 6.3 }, "140": { "h": 140, "w": 73, "t": 4.7, "s": 6.9 }, "160": { "h": 160, "w": 82, "t": 5.0, "s": 7.4 }, "180": { "h": 180, "w": 91, "t": 5.3, "s": 8.0 }, "200": { "h": 200, "w": 100, "t": 5.6, "s": 8.5 } },
+      "HEB": { "100": { "h": 100, "w": 100, "t": 6, "s": 10 }, "120": { "h": 120, "w": 120, "t": 6.5, "s": 11 }, "140": { "h": 140, "w": 140, "t": 7, "s": 12 }, "160": { "h": 160, "w": 160, "t": 8, "s": 13 }, "180": { "h": 180, "w": 180, "t": 8.5, "s": 14 }, "200": { "h": 200, "w": 200, "t": 9, "s": 15 } },
+      "HEA": { "100": { "h": 96, "w": 100, "t": 5, "s": 8 }, "120": { "h": 114, "w": 120, "t": 5, "s": 8 }, "140": { "h": 133, "w": 140, "t": 5.5, "s": 8.5 }, "160": { "h": 152, "w": 160, "t": 6, "s": 9 }, "180": { "h": 171, "w": 180, "t": 6, "s": 9.5 }, "200": { "h": 190, "w": 200, "t": 6.5, "s": 10 } }
+    },
+    "uChannel": {
+      "UNP": { "80": { "h": 80, "w": 45, "t": 6, "s": 8 }, "100": { "h": 100, "w": 50, "t": 6, "s": 8.5 }, "120": { "h": 120, "w": 55, "t": 7, "s": 9 }, "140": { "h": 140, "w": 60, "t": 7, "s": 10 }, "160": { "h": 160, "w": 65, "t": 7.5, "s": 10.5 }, "180": { "h": 180, "w": 70, "t": 8, "s": 11 }, "200": { "h": 200, "w": 75, "t": 8.5, "s": 11.5 } }
+    },
+    "angleProfile": {
+      "equalLegAngle": {
+        "20x3": { "h": 20, "w": 20, "t": 3 }, "25x3": { "h": 25, "w": 25, "t": 3 }, "30x3": { "h": 30, "w": 30, "t": 3 },
+        "40x4": { "h": 40, "w": 40, "t": 4 }, "50x5": { "h": 50, "w": 50, "t": 5 }, "60x6": { "h": 60, "w": 60, "t": 6 },
+        "80x8": { "h": 80, "w": 80, "t": 8 }, "100x10": { "h": 100, "w": 100, "t": 10 }
+      },
+      "unequalLegAngle": {
+        "30x20x3": { "h": 30, "w": 20, "t": 3}, "40x20x4": { "h": 40, "w": 20, "t": 4},
+        "50x30x5": { "h": 50, "w": 30, "t": 5}, "60x40x6": { "h": 60, "w": 40, "t": 6},
+        "80x60x8": { "h": 80, "w": 60, "t": 8}, "100x50x8": { "h": 100, "w": 50, "t": 8}
+      }
+    }
+  },
+  "PRODUCT_TYPES": {
+    "roundProfile": { "dims": [{ "id": "diameter", "unit": "mm" }] },
+    "squareProfile": { "dims": [{ "id": "sideA", "unit": "mm" }] },
+    "flatProfile": { "dims": [{ "id": "width", "unit": "mm" }, { "id": "height", "unit": "mm" }] },
+    "pipe": { "dims": [{ "id": "outerDiameter", "unit": "mm" }, { "id": "wallThickness", "unit": "mm" }] },
+    "tube": { "dims": [{ "id": "width", "unit": "mm" }, { "id": "height", "unit": "mm" }, { "id": "wallThickness", "unit": "mm" }] },
+    "iBeam": { "dims": [{ "id": "height", "unit": "mm", "key": "h" }, { "id": "width", "unit": "mm", "key": "w" }, { "id": "webThickness", "unit": "mm", "key": "t" }, { "id": "flangeThickness", "unit": "mm", "key": "s" }] },
+    "uChannel": { "dims": [{ "id": "height", "unit": "mm", "key": "h" }, { "id": "width", "unit": "mm", "key": "w" }, { "id": "webThickness", "unit": "mm", "key": "t" }, { "id": "flangeThickness", "unit": "mm", "key": "s" }] },
+    "angleProfile": { "dims": [{ "id": "height", "unit": "mm", "key": "h" }, { "id": "width", "unit": "mm", "key": "w" }, { "id": "wallThickness", "unit": "mm", "key": "t" }] }
+  },
+  "LANG": {
+    "hu": {
+      "title": "Metal Calculator", "inputParameters": "Bemeneti paraméterek", "material": "Anyag", "productType": "Terméktípus", "results": "Számítási eredmények",
+      "crossSection": "Keresztmetszet", "weightPerMeter": "Tömeg / méter", "surfacePerMeter": "Felület / méter",
+      "priceCalculation": "Árszámítás", "pricePerKg": "Ár / kg", "pricePerMeter": "Ár / méter", "allRightsReserved": "Minden jog fenntartva.",
+      "manageMaterials": "Anyagok kezelése", "addMaterial": "Új anyag hozzáadása", "materialList": "Anyaglista", "materialName": "Anyag neve", "density": "Sűrűség", "add": "Hozzáad",
+      "customMaterials": "Saját anyagok", "favorites": "Kedvencek", "structuralSteels": "Szerkezeti acélok", "stainlessSteels": "Rozsdamentes acélok", "toolSteels": "Szerszámacélok",
+      "specialSteels": "Különleges acélok", "lightMetals": "Könnyűfémek", "nonFerrousMetals": "Színesfémek", "castIrons": "Öntöttvasak", "specialAlloys": "Speciális ötvözetek", "plastics": "Műanyagok",
+      "toggleFavorite": "Kedvencnek jelölés", "edit": "Szerkeszt", "delete": "Töröl", "save": "Ment", "cancel": "Mégse", "chartsTitle": "Grafikonok", "exchangeRateChart": "EUR/HUF árfolyam",
+      "perMeterValues": "Méterenkénti értékek", "totalBodyValues": "Teljes test értékei", "totalWeight": "Teljes tömeg", "totalSurface": "Teljes felület", "totalPrice": "Teljes ár",
+      "roundProfile": "Kör szelvény", "squareProfile": "Négyzet szelvény", "flatProfile": "Lapos szelvény", "pipe": "Cső", "tube": "Zártszelvény",
+      "specialProfiles": "Szelvények", "iBeam": "I/H-szelvény", "uChannel": "U-szelvény", "angleProfile": "L-szelvény (Szögvas)",
+      "equalLegAngle": "Egyenlő szárú", "unequalLegAngle": "Egyenlőtlen szárú",
+      "standardSize": "Szabványméret", "selectSize": "Válassz méretet",
+      "diameter": "Átmérő", "sideA": "Oldalhossz", "width": "Szélesség", "height": "Magasság", "outerDiameter": "Külső átmérő", "wallThickness": "Falvastagság", "length": "Hossz",
+      "webThickness": "Gerinc vastagság", "flangeThickness": "Öv vastagság",
+      "oneMonth": "1 Hónap", "oneYear": "1 Év",
+      "resetAll": "Mindent töröl", "exchangeRate": "Árfolyam",
+      "selectMaterial": "Válassz anyagot...", "selectProduct": "Válassz terméket..."
+    },
+    "en": {
+      "title": "Metal Calculator", "inputParameters": "Input Parameters", "material": "Material", "productType": "Product Type", "results": "Calculation Results",
+      "crossSection": "Cross-section", "weightPerMeter": "Weight / meter", "surfacePerMeter": "Surface / meter",
+      "priceCalculation": "Price Calculation", "pricePerKg": "Price / kg", "pricePerMeter": "Price / meter", "allRightsReserved": "All rights reserved.",
+      "manageMaterials": "Manage Materials", "addMaterial": "Add New Material", "materialList": "Material List", "materialName": "Material Name", "density": "Density", "add": "Add",
+      "customMaterials": "Custom Materials", "favorites": "Favorites", "structuralSteels": "Structural Steels", "stainlessSteels": "Stainless Steels", "toolSteels": "Tool Steels",
+      "specialSteels": "Special Steels", "lightMetals": "Light Metals", "nonFerrousMetals": "Non-Ferrous Metals", "castIrons": "Cast Irons", "specialAlloys": "Special Alloys", "plastics": "Plastics",
+      "toggleFavorite": "Toggle Favorite", "edit": "Edit", "delete": "Delete", "save": "Save", "cancel": "Cancel", "chartsTitle": "Charts", "exchangeRateChart": "EUR/HUF Exchange Rate",
+      "perMeterValues": "Values Per Meter", "totalBodyValues": "Total Body Values", "totalWeight": "Total Weight", "totalSurface": "Total Surface", "totalPrice": "Total Price",
+      "roundProfile": "Round Profile", "squareProfile": "Square Profile", "flatProfile": "Flat Profile", "pipe": "Pipe", "tube": "Tube",
+      "specialProfiles": "Profiles", "iBeam": "I/H-Beam", "uChannel": "U-Channel", "angleProfile": "L-Profile (Angle)",
+      "equalLegAngle": "Equal Leg", "unequalLegAngle": "Unequal Leg",
+      "standardSize": "Standard Size", "selectSize": "Select a size",
+      "diameter": "Diameter", "sideA": "Side length", "width": "Width", "height": "Height", "outerDiameter": "Outer Diameter", "wallThickness": "Wall Thickness", "length": "Length",
+      "webThickness": "Web Thickness", "flangeThickness": "Flange Thickness",
+      "oneMonth": "1 Month", "oneYear": "1 Year",
+      "resetAll": "Clear All", "exchangeRate": "Exchange Rate",
+      "selectMaterial": "Select material...", "selectProduct": "Select product type..."
+    }
+  }
+}
