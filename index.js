@@ -1,3 +1,4 @@
+
 import { calculateCrossSection, calculateSurfaceAreaPerMeter } from './calculator.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -5,51 +6,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Globális változók és állapot ---
     let APP_DATA = {};
     let HISTORICAL_RATES = {};
-    const APP_VERSION = '1.6.0';
+    const APP_VERSION = '1.7.0';
 
     let state = {
         lang: 'hu', theme: 'dark', eurHufRate: 400.0, priceCurrency: 'HUF',
         customMaterials: {}, favorites: [], productFavorites: [],
-        crossSectionUnit: 'mm2', lengthUnit: 'mm', selectedMaterial: null, priceHufKg: 0,
+        crossSectionUnit: 'mm2', lengthUnit: 'mm', selectedMaterial: null, selectedProduct: null, selectedStandardSize: null,
+        priceHufKg: 0,
         pipeDimUnits: { outerDiameter: 'mm', wallThickness: 'mm' },
         charts: { current: null },
         materialFilterActive: true,
-    };
-    
-    const SVG_DEFS = `
-        <defs>
-            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-primary)" />
-            </marker>
-            <pattern id="hatch" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
-                <path d="M 0,4 l 8,0" stroke="var(--text-secondary)" stroke-width="0.7"/>
-            </pattern>
-        </defs>
-        <style>
-            .profile { stroke: var(--text-primary); stroke-width: 2; fill: url(#hatch); }
-            .dim-line { stroke: var(--text-secondary); stroke-width: 0.5; marker-start: url(#arrow); marker-end: url(#arrow); }
-            .ext-line { stroke: var(--text-secondary); stroke-width: 0.5; }
-            .label { fill: var(--text-primary); font-size: 10px; font-family: monospace; text-anchor: middle; }
-        </style>
-    `;
-
-    const SVG_TEMPLATES = {
-        roundProfile: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<circle cx="60" cy="60" r="40" class="profile"/><line x1="20" y1="30" x2="100" y2="30" class="dim-line"/><line x1="20" y1="20" x2="20" y2="100" class="ext-line"/><line x1="100" y1="20" x2="100" y2="100" class="ext-line"/><text x="60" y="25" class="label">d</text></svg>`,
-        squareProfile: `<svg viewBox="0 0 140 120" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<rect x="20" y="20" width="80" height="80" rx="10" class="profile"/><line x1="20" y1="10" x2="100" y2="10" class="dim-line"/><line x1="20" y1="15" x2="20" y2="20" class="ext-line"/><line x1="100" y1="15" x2="100" y2="20" class="ext-line"/><text x="60" y="8" class="label">a</text><line x1="10" y1="20" x2="10" y2="100" class="dim-line"/><line x1="15" y1="20" x2="20" y2="20" class="ext-line"/><line x1="15" y1="100" x2="20" y2="100" class="ext-line"/><text x="5" y="60" class="label">a</text><path d="M20,30 A10,10 0 0 1 30,20" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="30" y1="20" x2="40" y2="10" class="ext-line"/><line x1="40" y1="10" x2="110" y2="10" class="ext-line" stroke-dasharray="2 2" /><line x1="110" y1="10" x2="120" y2="0" class="ext-line" /><text x="122" y="0" class="label">r</text></svg>`,
-        flatProfile: `<svg viewBox="0 0 170 120" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<rect x="20" y="20" width="130" height="80" rx="10" class="profile"/><line x1="20" y1="10" x2="150" y2="10" class="dim-line"/><line x1="20" y1="15" x2="20" y2="20" class="ext-line"/><line x1="150" y1="15" x2="150" y2="20" class="ext-line"/><text x="85" y="8" class="label">b</text><line x1="10" y1="20" x2="10" y2="100" class="dim-line"/><line x1="15" y1="20" x2="20" y2="20" class="ext-line"/><line x1="15" y1="100" x2="20" y2="100" class="ext-line"/><text x="5" y="60" class="label">a</text><path d="M20,30 A10,10 0 0 1 30,20" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="30" y1="20" x2="40" y2="10" class="ext-line"/><line x1="40" y1="10" x2="50" y2="0" class="ext-line" /><text x="52" y="0" class="label">r</text></svg>`,
-        pipe: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<path class="profile" d="M60,20 A40,40 0 1 1 59.99,20 Z M60,40 A20,20 0 1 0 60.01,40 Z"/><line x1="20" y1="30" x2="100" y2="30" class="dim-line"/><line x1="20" y1="20" x2="20" y2="100" class="ext-line"/><line x1="100" y1="20" x2="100" y2="100" class="ext-line"/><text x="60" y="25" class="label">D</text><line x1="60" y1="20" x2="60" y2="40" class="dim-line"/><text x="65" y="30" class="label" text-anchor="start">t</text></svg>`,
-        tube: `<svg viewBox="0 0 170 120" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<path class="profile" fill-rule="evenodd" d="M 20 30 A 10 10 0 0 1 30 20 H 140 A 10 10 0 0 1 150 30 V 90 A 10 10 0 0 1 140 100 H 30 A 10 10 0 0 1 20 90 V 30 Z M 35 45 A 5 5 0 0 1 40 40 H 130 A 5 5 0 0 1 135 45 V 75 A 5 5 0 0 1 130 80 H 40 A 5 5 0 0 1 35 75 V 45 Z"/><line x1="20" y1="10" x2="150" y2="10" class="dim-line"/><line x1="20" y1="15" x2="20" y2="20" class="ext-line"/><line x1="150" y1="15" x2="150" y2="20" class="ext-line"/><text x="85" y="8" class="label">b</text><line x1="10" y1="20" x2="10" y2="100" class="dim-line"/><line x1="15" y1="20" x2="20" y2="20" class="ext-line"/><line x1="15" y1="100" x2="20" y2="100" class="ext-line"/><text x="5" y="60" class="label">a</text><path d="M20,30 A10,10 0 0 1 30,20" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="30" y1="20" x2="40" y2="10" class="ext-line"/><line x1="40" y1="10" x2="50" y2="0" class="ext-line" /><text x="52" y="0" class="label">r</text><line x1="20" y1="60" x2="35" y2="60" class="dim-line"/><text x="27.5" y="55" class="label">t</text></svg>`,
-        iBeam: `<svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<path class="profile" d="M15,10 h100 v15 h-42.5 c-2.76,0 -5,2.24 -5,5 v60 c0,2.76 2.24,5 5,5 H115 v15 H15 v-15 h42.5 c2.76,0 5,-2.24 5,-5 v-60 c0,-2.76 -2.24,-5 -5,-5 H15 Z" /><line x1="5" y1="10" x2="5" y2="120" class="dim-line"/><text x="0" y="65" class="label" writing-mode="vertical-rl">h</text><line x1="15" y1="5" x2="115" y2="5" class="dim-line"/><text x="65" y="3" class="label">b</text><line x1="120" y1="10" x2="120" y2="25" class="dim-line"/><text x="122" y="17.5" class="label" text-anchor="start">t</text><line x1="60" y1="25" x2="60" y2="105" class="ext-line"/><line x1="70" y1="25" x2="70" y2="105" class="ext-line"/><line x1="60" y1="125" x2="70" y2="125" class="dim-line"/><text x="65" y="129" class="label">s</text><path d="M62.5,30 H55 c-2.76,0 -5,2.24 -5,5 v7.5" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="62.5" y1="30" x2="75" y2="20" class="ext-line"/><text x="77" y="18" class="label">r1</text></svg>`,
-        uChannel: `<svg viewBox="0 0 110 130" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<path class="profile" d="M90,10 h-80 v110 h80 v-10 c0,-2.76 -2.24,-5 -5,-5 H30 c-2.76,0 -5,-2.24 -5,-5 v-70 c0,-2.76 2.24,-5 5,-5 H85 c2.76,0 5,-2.24 5,-5 Z" /><line x1="5" y1="10" x2="5" y2="120" class="dim-line"/><text x="0" y="65" class="label" writing-mode="vertical-rl">h</text><line x1="10" y1="5" x2="90" y2="5" class="dim-line"/><text x="50" y="3" class="label">b</text><line x1="95" y1="10" x2="95" y2="20" class="dim-line"/><text x="97" y="15" class="label" text-anchor="start">t</text><line x1="10" y1="125" x2="25" y2="125" class="dim-line"/><text x="17.5" y="129" class="label">s</text><path d="M32.5,25 H25 c-2.76,0 -5,2.24 -5,5 v7.5" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="32.5" y1="25" x2="45" y2="15" class="ext-line"/><text x="47" y="13" class="label">r1</text><path d="M85,20 h5 v5 c0,2.76 -2.24,5 -5,5" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="90" y1="20" x2="100" y2="10" class="ext-line"/><text x="102" y="8" class="label">r2</text></svg>`,
-        angleProfile: `<svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<path class="profile" d="M10,10 h15 c2.76,0 5,2.24 5,5 v85 c0,2.76 -2.24,5 -5,5 H105 c2.76,0 5,2.24 5,5 v5 H10 Z" /><line x1="5" y1="10" x2="5" y2="120" class="dim-line"/><text x="0" y="65" class="label" writing-mode="vertical-rl">a</text><line x1="10" y1="125" x2="110" y2="125" class="dim-line"/><text x="60" y="129" class="label">b</text><line x1="27" y1="10" x2="27" y2="25" class="dim-line" /><text x="32" y="17.5" class="label" text-anchor="start">v</text><path d="M30,22.5 v-7.5 c0,-2.76 -2.24,-5 -5,-5 H17.5" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="30" y1="22.5" x2="40" y2="12.5" class="ext-line"/><text x="42" y="10.5" class="label">r1</text><path d="M105,105 h5 v5 c0,2.76 -2.24,5 -5,5" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="110" y1="105" x2="120" y2="95" class="ext-line"/><text x="122" y="93" class="label">r2</text></svg>`,
     };
 
     // --- DOM Elemek Gyűjtése ---
     const DOMElements = {};
     const domIds = [
         'main-container', 'resizer', 'lang-selector', 'theme-toggle', 'theme-icon-sun', 'theme-icon-moon', 'reset-btn',
-        'material-select-custom', 'favorite-toggle-btn', 'product-type-select', 'product-favorite-toggle-btn', 
-        'standard-size-container', 'standard-size-select', 'dimension-fields', 'length-input', 'length-unit-toggle',
+        'material-select-custom', 'favorite-toggle-btn', 'product-type-select-custom', 'product-favorite-toggle-btn', 
+        'standard-size-container', 'standard-size-select-custom', 'dimension-fields', 'length-input', 'length-unit-toggle',
         'per-meter-results-section', 'results-total-wrapper', 'result-cross-section', 'cross-section-unit-toggle', 'result-weight-meter', 'result-surface-area', 
         'result-total-weight', 'result-total-surface', 'result-total-price', 'total-price-unit-toggle', 
         'eur-huf-rate', 'exchange-rate-chart-btn', 'exchange-rate-reset-btn', 'price-per-kg', 'price-per-meter', 'price-unit-toggle-kg', 
@@ -57,14 +31,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         'chart-popup-overlay', 'chart-popup-content', 'chart-popup-title', 'chart-popup-body',
         'chart-start-date', 'chart-end-date', 'chart-range-1m', 'chart-range-1y',
         'new-material-name', 'new-material-density', 'add-material-btn', 'all-materials-list', 
-        'editing-material-name', 'copyright-year', 'app-version', 'drawing-section', 'drawing-container'
+        'editing-material-name', 'copyright-year', 'app-version'
     ];
     domIds.forEach(id => {
         const camelCaseId = id.replace(/-(\w)/g, (_, c) => c.toUpperCase());
         DOMElements[camelCaseId] = document.getElementById(id);
     });
+    
+    // Custom Selects
     DOMElements.materialSelectDisplay = document.querySelector('#material-select-custom .custom-select-display');
     DOMElements.materialSelectOptions = document.querySelector('#material-select-custom .custom-select-options');
+    DOMElements.productTypeSelectDisplay = document.querySelector('#product-type-select-custom .custom-select-display');
+    DOMElements.productTypeSelectOptions = document.querySelector('#product-type-select-custom .custom-select-options');
+    DOMElements.standardSizeSelectDisplay = document.querySelector('#standard-size-select-custom .custom-select-display');
+    DOMElements.standardSizeSelectOptions = document.querySelector('#standard-size-select-custom .custom-select-options');
 
 
     // --- Adatkezelés és API ---
@@ -186,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return li;
         };
 
-        const productType = DOMElements.productTypeSelect.value;
+        const productType = state.selectedProduct;
         const availableGroups = state.materialFilterActive && productType ? PRODUCT_MATERIAL_AVAILABILITY[productType] : Object.keys(MATERIAL_GROUPS);
 
         const createGroup = (labelKey, keys) => {
@@ -273,48 +253,88 @@ document.addEventListener('DOMContentLoaded', async () => {
             
     function populateProductTypeSelect() {
         const { PRODUCT_TYPES, LANG } = APP_DATA;
-        const currentVal = DOMElements.productTypeSelect.value;
-        DOMElements.productTypeSelect.innerHTML = '';
+        DOMElements.productTypeSelectOptions.innerHTML = '';
         const specialProfiles = ['angleProfile', 'iBeam', 'uChannel'];
 
-        DOMElements.productTypeSelect.innerHTML = `<option value="" disabled selected>${LANG[state.lang].selectProduct}</option>`;
-
         const createOption = (key) => {
-            const option = document.createElement('option');
-            option.value = key; option.innerText = LANG[state.lang][key] || key;
-            return option;
+            const li = document.createElement('li');
+            li.className = 'option';
+            li.dataset.value = key;
+            li.textContent = LANG[state.lang][key] || key;
+            return li;
         };
         
         const createGroup = (labelKey, keys) => {
-            const group = document.createElement('optgroup');
-            group.label = LANG[state.lang][labelKey] || labelKey;
-            keys.forEach(key => group.appendChild(createOption(key)));
-            if(group.childElementCount > 0) DOMElements.productTypeSelect.appendChild(group);
+            if (!keys || keys.length === 0) return;
+            const groupLi = document.createElement('li');
+            const header = document.createElement('div');
+            header.className = 'group-header';
+            header.textContent = LANG[state.lang][labelKey] || labelKey;
+            
+            const optionList = document.createElement('ul');
+            optionList.className = 'option-list';
+
+            keys.forEach(key => optionList.appendChild(createOption(key)));
+            
+            const isExpanded = ['favorites'].includes(labelKey);
+            if (optionList.childElementCount > 0) {
+                 if (isExpanded) {
+                    header.classList.add('expanded');
+                    optionList.classList.add('expanded');
+                }
+                groupLi.appendChild(header);
+                groupLi.appendChild(optionList);
+                DOMElements.productTypeSelectOptions.appendChild(groupLi);
+            }
         };
         
         createGroup('favorites', state.productFavorites);
         createGroup('productType', Object.keys(PRODUCT_TYPES).filter(p => !specialProfiles.includes(p) && !state.productFavorites.includes(p)));
         createGroup('specialProfiles', specialProfiles.filter(p => !state.productFavorites.includes(p)));
         
-        if (currentVal) DOMElements.productTypeSelect.value = currentVal;
-        
+        if (state.selectedProduct) {
+            selectProductType(state.selectedProduct, false);
+        } else {
+            DOMElements.productTypeSelectDisplay.textContent = LANG[state.lang].selectProduct;
+        }
         updateProductFavoriteButtonState();
     }
+    
+    function selectProductType(productType, clearInputs = true) {
+        if (!productType) return;
+        state.selectedProduct = productType;
+        if(clearInputs) {
+            resetDimensionInputs();
+            state.materialFilterActive = true;
+            state.selectedMaterial = null;
+            populateMaterialSelect();
+        }
+
+        const { LANG } = APP_DATA;
+        DOMElements.productTypeSelectDisplay.textContent = LANG[state.lang][productType] || productType;
+        DOMElements.productTypeSelectOptions.querySelectorAll('.option.selected').forEach(el => el.classList.remove('selected'));
+        const optionEl = DOMElements.productTypeSelectOptions.querySelector(`.option[data-value="${productType}"]`);
+        if(optionEl) optionEl.classList.add('selected');
+        
+        updateDimensionFields(); 
+        updateProductFavoriteButtonState();
+        storage.saveState();
+    }
+
 
     function updateProductFavoriteButtonState() {
-        const currentProduct = DOMElements.productTypeSelect.value;
+        const currentProduct = state.selectedProduct;
         DOMElements.productFavoriteToggleBtn.classList.toggle('is-favorite', state.productFavorites.includes(currentProduct));
     }
 
     function updateDimensionFields() {
         const { PRODUCT_TYPES, LANG } = APP_DATA;
-        const productType = DOMElements.productTypeSelect.value;
+        const productType = state.selectedProduct;
         const config = PRODUCT_TYPES[productType];
 
         DOMElements.dimensionFields.innerHTML = '';
         if (!config) {
             updateStandardSizeSelector(null);
-            updateSVGDrawing(null);
             calculate();
             return;
         }
@@ -347,81 +367,105 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         
         updateStandardSizeSelector(productType);
-        updateSVGDrawing(productType);
         calculate();
     }
     
-    function updateSVGDrawing(productType) {
-        if (!productType || !SVG_TEMPLATES[productType]) {
-            DOMElements.drawingSection.style.display = 'none';
-            DOMElements.drawingContainer.innerHTML = '';
-            return;
-        }
-        DOMElements.drawingSection.style.display = 'block';
-        DOMElements.drawingContainer.innerHTML = SVG_TEMPLATES[productType];
-    }
-
-
     function updateStandardSizeSelector(productType) {
         const { STANDARD_PROFILES, LANG } = APP_DATA;
         const profileData = productType ? STANDARD_PROFILES[productType] : null;
 
+        DOMElements.standardSizeSelectOptions.innerHTML = '';
         if(profileData) {
             DOMElements.standardSizeContainer.style.display = 'block';
-            DOMElements.standardSizeSelect.innerHTML = `<option value="">${LANG[state.lang].selectSize}</option>`;
+            
+            const createOption = (key, value) => {
+                const li = document.createElement('li');
+                li.className = 'option';
+                li.dataset.value = value;
+                li.textContent = key;
+                return li;
+            };
+
             Object.entries(profileData).forEach(([series, sizes]) => {
-                const optgroup = document.createElement('optgroup');
-                optgroup.label = LANG[state.lang][series] || series;
+                const groupLi = document.createElement('li');
+                const header = document.createElement('div');
+                header.className = 'group-header expanded';
+                header.textContent = LANG[state.lang][series] || series;
+
+                const optionList = document.createElement('ul');
+                optionList.className = 'option-list expanded';
+
                 Object.keys(sizes).sort((a,b) => {
                     const numA = a.match(/\d+/g) ? parseInt(a.match(/\d+/g)[0]) : 0;
                     const numB = b.match(/\d+/g) ? parseInt(b.match(/\d+/g)[0]) : 0;
                     return numA - numB;
                 }).forEach(sizeKey => {
-                        const option = document.createElement('option');
-                        option.value = `${series}-${sizeKey}`;
-                        option.textContent = `${sizeKey}`;
-                        optgroup.appendChild(option);
+                    optionList.appendChild(createOption(sizeKey, `${series}-${sizeKey}`));
                 });
-                DOMElements.standardSizeSelect.appendChild(optgroup);
-            });
-        } else {
-            DOMElements.standardSizeContainer.style.display = 'none';
-        }
-    }
-            
-    function fillDimensionsFromStandardSize() {
-        const { STANDARD_PROFILES, PRODUCT_TYPES } = APP_DATA;
-        const value = DOMElements.standardSizeSelect.value;
-        if(!value) return;
-        
-        const [series, size] = value.split('-');
-        const productType = DOMElements.productTypeSelect.value;
-        const dims = STANDARD_PROFILES[productType]?.[series]?.[size];
-        
-        if(dims) {
-            PRODUCT_TYPES[productType].dims.forEach((dimConfig) => {
-                const isRadius = dimConfig.key && dimConfig.key.startsWith('r');
-                if(isRadius) return;
-                
-                const key = dimConfig.key || dimConfig.id.replace('dim-', '');
-                const input = document.getElementById(`dim-${dimConfig.id}`);
-                if(input && dims[key] !== undefined) {
-                    input.value = dims[key];
+
+                if(optionList.hasChildNodes()) {
+                    groupLi.appendChild(header);
+                    groupLi.appendChild(optionList);
+                    DOMElements.standardSizeSelectOptions.appendChild(groupLi);
                 }
             });
-            calculate();
+
+            if (state.selectedStandardSize) {
+                selectStandardSize(state.selectedStandardSize, false);
+            } else {
+                 DOMElements.standardSizeSelectDisplay.textContent = LANG[state.lang].selectSize;
+            }
+
+        } else {
+            DOMElements.standardSizeContainer.style.display = 'none';
+            state.selectedStandardSize = null;
         }
+    }
+    
+    function selectStandardSize(value, fillDims = true) {
+        if (!value) return;
+        state.selectedStandardSize = value;
+
+        const { STANDARD_PROFILES, LANG } = APP_DATA;
+        const [series, size] = value.split('-');
+        const dims = STANDARD_PROFILES[state.selectedProduct]?.[series]?.[size];
+        
+        DOMElements.standardSizeSelectDisplay.textContent = size || LANG[state.lang].selectSize;
+        DOMElements.standardSizeSelectOptions.querySelectorAll('.option.selected').forEach(el => el.classList.remove('selected'));
+        const optionEl = DOMElements.standardSizeSelectOptions.querySelector(`.option[data-value="${value}"]`);
+        if(optionEl) optionEl.classList.add('selected');
+
+        if(fillDims && dims) {
+            fillDimensionsFromStandardSize(dims);
+        }
+        storage.saveState();
+    }
+            
+    function fillDimensionsFromStandardSize(dims) {
+        const { PRODUCT_TYPES } = APP_DATA;
+        
+        PRODUCT_TYPES[state.selectedProduct].dims.forEach((dimConfig) => {
+            const isRadius = dimConfig.key && dimConfig.key.startsWith('r');
+            if(isRadius) return;
+            
+            const key = dimConfig.key || dimConfig.id.replace('dim-', '');
+            const input = document.getElementById(`dim-${dimConfig.id}`);
+            if(input && dims[key] !== undefined) {
+                input.value = dims[key];
+            }
+        });
+        calculate();
     }
             
     // --- Fő Számítási Logika ---
     function getDimensions() {
         const { PRODUCT_TYPES, STANDARD_PROFILES } = APP_DATA;
         const values = {};
-        const productType = DOMElements.productTypeSelect.value;
+        const productType = state.selectedProduct;
         if(!productType) return {};
 
-        const sizeValue = DOMElements.standardSizeSelect.value;
-        const isStandardSize = sizeValue && DOMElements.standardSizeSelect.style.display !== 'none';
+        const sizeValue = state.selectedStandardSize;
+        const isStandardSize = sizeValue && DOMElements.standardSizeContainer.style.display !== 'none';
         let standardDims = {};
         if (isStandardSize) {
              const [series, size] = sizeValue.split('-');
@@ -461,7 +505,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
     function calculate() {
         const { MATERIAL_DENSITIES } = APP_DATA;
-        const productType = DOMElements.productTypeSelect.value;
+        const productType = state.selectedProduct;
         const materialName = state.selectedMaterial;
         const allMaterials = { ...MATERIAL_DENSITIES, ...state.customMaterials };
         const density = allMaterials[materialName] || 0;
@@ -556,7 +600,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     function resetDimensionInputs() {
         document.querySelectorAll('.dimension-input').forEach(input => input.value = '');
         DOMElements.lengthInput.value = '';
-        if (DOMElements.standardSizeSelect) DOMElements.standardSizeSelect.value = '';
+        state.selectedStandardSize = null;
+        if (DOMElements.standardSizeSelectDisplay) {
+            DOMElements.standardSizeSelectDisplay.textContent = APP_DATA.LANG[state.lang].selectSize;
+            DOMElements.standardSizeSelectOptions.querySelectorAll('.option.selected').forEach(el => el.classList.remove('selected'));
+        }
     }
 
     function resetAllInputs() {
@@ -771,6 +819,57 @@ document.addEventListener('DOMContentLoaded', async () => {
             calculate();
         });
 
+        // --- Custom Select Event Listeners ---
+        function setupCustomSelect(container) {
+            const display = container.querySelector('.custom-select-display');
+            const options = container.querySelector('.custom-select-options');
+            
+            display.addEventListener('click', () => options.classList.toggle('open'));
+            
+            options.addEventListener('click', (e) => {
+                const target = e.target;
+                 if (target.classList.contains('group-header')) {
+                    target.classList.toggle('expanded'); 
+                    target.nextElementSibling.classList.toggle('expanded');
+                }
+            });
+        }
+        
+        setupCustomSelect(DOMElements.materialSelectCustom);
+        setupCustomSelect(DOMElements.productTypeSelectCustom);
+        setupCustomSelect(DOMElements.standardSizeSelectCustom);
+        
+        document.addEventListener('click', (e) => {
+            if (!DOMElements.materialSelectCustom.contains(e.target)) DOMElements.materialSelectOptions.classList.remove('open');
+            if (!DOMElements.productTypeSelectCustom.contains(e.target)) DOMElements.productTypeSelectOptions.classList.remove('open');
+            if (!DOMElements.standardSizeSelectCustom.contains(e.target)) DOMElements.standardSizeSelectOptions.classList.remove('open');
+        });
+
+        // --- Option Click Handlers ---
+        DOMElements.materialSelectOptions.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.classList.contains('option')) {
+                selectMaterial(target.dataset.value); 
+                DOMElements.materialSelectOptions.classList.remove('open');
+            }
+        });
+        
+        DOMElements.productTypeSelectOptions.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.classList.contains('option')) {
+                selectProductType(target.dataset.value);
+                DOMElements.productTypeSelectOptions.classList.remove('open');
+            }
+        });
+
+        DOMElements.standardSizeSelectOptions.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.classList.contains('option')) {
+                selectStandardSize(target.dataset.value);
+                DOMElements.standardSizeSelectOptions.classList.remove('open');
+            }
+        });
+
         DOMElements.favoriteToggleBtn.addEventListener('click', () => {
             const name = state.selectedMaterial;
             if (!name) return;
@@ -780,39 +879,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         
         DOMElements.productFavoriteToggleBtn.addEventListener('click', () => {
-            const name = DOMElements.productTypeSelect.value;
+            const name = state.selectedProduct;
             if(!name) return;
             const index = state.productFavorites.indexOf(name);
             if (index > -1) state.productFavorites.splice(index, 1); else state.productFavorites.push(name);
             storage.saveState(); populateProductTypeSelect();
         });
 
-        DOMElements.materialSelectDisplay.addEventListener('click', () => DOMElements.materialSelectOptions.classList.toggle('open'));
-        document.addEventListener('click', (e) => {
-            if (!DOMElements.materialSelectCustom.contains(e.target)) DOMElements.materialSelectOptions.classList.remove('open');
-        });
-        DOMElements.materialSelectOptions.addEventListener('click', (e) => {
-            const target = e.target;
-            if (target.classList.contains('group-header')) {
-                target.classList.toggle('expanded'); target.nextElementSibling.classList.toggle('expanded');
-            } else if (target.classList.contains('option')) {
-                selectMaterial(target.dataset.value); 
-                DOMElements.materialSelectOptions.classList.remove('open');
-            }
-        });
-        DOMElements.productTypeSelect.addEventListener('change', () => {
-            resetDimensionInputs();
-            state.materialFilterActive = true; // Reset filter on product change
-            state.selectedMaterial = null; // Clear material selection
-            populateMaterialSelect();
-            updateDimensionFields(); 
-            updateProductFavoriteButtonState();
-        });
-        DOMElements.standardSizeSelect.addEventListener('change', fillDimensionsFromStandardSize);
-        
         DOMElements.dimensionFields.addEventListener('input', (e) => {
             if (e.target.matches('.dimension-input')) {
-                if (DOMElements.standardSizeSelect) DOMElements.standardSizeSelect.value = ""; 
+                state.selectedStandardSize = null;
+                 if (DOMElements.standardSizeSelectDisplay) {
+                    DOMElements.standardSizeSelectDisplay.textContent = APP_DATA.LANG[state.lang].selectSize;
+                    DOMElements.standardSizeSelectOptions.querySelectorAll('.option.selected').forEach(el => el.classList.remove('selected'));
+                }
                 calculate();
             }
         });
@@ -949,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         DOMElements.copyrightYear.textContent = new Date().getFullYear().toString();
         
         resetDimensionInputs();
-        if(!DOMElements.productTypeSelect.value) updateDimensionFields();
+        if(!state.selectedProduct) updateDimensionFields();
         fetchExchangeRate();
         initResizer();
         setupEventListeners();

@@ -2,6 +2,23 @@
 
 A projekt minden jelentős változása ebben a fájlban lesz dokumentálva.
 
+## [1.7.0] - 2024-07-31
+
+### Eltávolítva
+- **Műszaki rajz funkció:** A felhasználói visszajelzések és a funkció implementációs nehézségei miatt a dinamikus műszaki rajz panel teljes mértékben eltávolításra került. Ez jelentősen egyszerűsíti a felhasználói felületet és a kódbázist.
+
+## [1.6.1] - 2024-07-31
+
+### Javítva
+- Kritikus hiba javítása, amely megakadályozta az alkalmazás megfelelő működését. A `product-type-select` elem cseréje miatti JavaScript hiba (`null reference`) elhárítva, ami miatt a dinamikus tartalmak (méretmezők, anyagszűrés, számítások) és a feliratok nem töltődtek be.
+
+## [1.6.0] - 2024-07-31
+
+### Hozzáadva
+- **Professzionális Műszaki Rajzok:** Az összes terméktípushoz tartozó SVG ábra újratervezve a műszaki rajz szabványainak megfelelően. A méretvonalak és jelölések már nem metszik a testet.
+### Módosítva
+- **Egységes UI:** A "Terméktípus" és "Szabványméret" választók is megkapták az egyedi, modern legördülő menü stílust. A beviteli mezők és legördülők zöld "glow" effektet kaptak a jobb vizuális visszajelzés érdekében.
+
 ## [1.4.0] - 2024-07-30
 
 ### Hozzáadva
