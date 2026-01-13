@@ -5,14 +5,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Globális változók és állapot ---
     let APP_DATA = {};
     let HISTORICAL_RATES = {};
-    const APP_VERSION = '1.4.0';
+    const APP_VERSION = '1.6.0';
 
     let state = {
         lang: 'hu', theme: 'dark', eurHufRate: 400.0, priceCurrency: 'HUF',
         customMaterials: {}, favorites: [], productFavorites: [],
         crossSectionUnit: 'mm2', lengthUnit: 'mm', selectedMaterial: null, priceHufKg: 0,
         pipeDimUnits: { outerDiameter: 'mm', wallThickness: 'mm' },
-        charts: { current: null }
+        charts: { current: null },
+        materialFilterActive: true,
+    };
+    
+    const SVG_DEFS = `
+        <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-primary)" />
+            </marker>
+            <pattern id="hatch" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+                <path d="M 0,4 l 8,0" stroke="var(--text-secondary)" stroke-width="0.7"/>
+            </pattern>
+        </defs>
+        <style>
+            .profile { stroke: var(--text-primary); stroke-width: 2; fill: url(#hatch); }
+            .dim-line { stroke: var(--text-secondary); stroke-width: 0.5; marker-start: url(#arrow); marker-end: url(#arrow); }
+            .ext-line { stroke: var(--text-secondary); stroke-width: 0.5; }
+            .label { fill: var(--text-primary); font-size: 10px; font-family: monospace; text-anchor: middle; }
+        </style>
+    `;
+
+    const SVG_TEMPLATES = {
+        roundProfile: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<circle cx="60" cy="60" r="40" class="profile"/><line x1="20" y1="30" x2="100" y2="30" class="dim-line"/><line x1="20" y1="20" x2="20" y2="100" class="ext-line"/><line x1="100" y1="20" x2="100" y2="100" class="ext-line"/><text x="60" y="25" class="label">d</text></svg>`,
+        squareProfile: `<svg viewBox="0 0 140 120" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<rect x="20" y="20" width="80" height="80" rx="10" class="profile"/><line x1="20" y1="10" x2="100" y2="10" class="dim-line"/><line x1="20" y1="15" x2="20" y2="20" class="ext-line"/><line x1="100" y1="15" x2="100" y2="20" class="ext-line"/><text x="60" y="8" class="label">a</text><line x1="10" y1="20" x2="10" y2="100" class="dim-line"/><line x1="15" y1="20" x2="20" y2="20" class="ext-line"/><line x1="15" y1="100" x2="20" y2="100" class="ext-line"/><text x="5" y="60" class="label">a</text><path d="M20,30 A10,10 0 0 1 30,20" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="30" y1="20" x2="40" y2="10" class="ext-line"/><line x1="40" y1="10" x2="110" y2="10" class="ext-line" stroke-dasharray="2 2" /><line x1="110" y1="10" x2="120" y2="0" class="ext-line" /><text x="122" y="0" class="label">r</text></svg>`,
+        flatProfile: `<svg viewBox="0 0 170 120" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<rect x="20" y="20" width="130" height="80" rx="10" class="profile"/><line x1="20" y1="10" x2="150" y2="10" class="dim-line"/><line x1="20" y1="15" x2="20" y2="20" class="ext-line"/><line x1="150" y1="15" x2="150" y2="20" class="ext-line"/><text x="85" y="8" class="label">b</text><line x1="10" y1="20" x2="10" y2="100" class="dim-line"/><line x1="15" y1="20" x2="20" y2="20" class="ext-line"/><line x1="15" y1="100" x2="20" y2="100" class="ext-line"/><text x="5" y="60" class="label">a</text><path d="M20,30 A10,10 0 0 1 30,20" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="30" y1="20" x2="40" y2="10" class="ext-line"/><line x1="40" y1="10" x2="50" y2="0" class="ext-line" /><text x="52" y="0" class="label">r</text></svg>`,
+        pipe: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<path class="profile" d="M60,20 A40,40 0 1 1 59.99,20 Z M60,40 A20,20 0 1 0 60.01,40 Z"/><line x1="20" y1="30" x2="100" y2="30" class="dim-line"/><line x1="20" y1="20" x2="20" y2="100" class="ext-line"/><line x1="100" y1="20" x2="100" y2="100" class="ext-line"/><text x="60" y="25" class="label">D</text><line x1="60" y1="20" x2="60" y2="40" class="dim-line"/><text x="65" y="30" class="label" text-anchor="start">t</text></svg>`,
+        tube: `<svg viewBox="0 0 170 120" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<path class="profile" fill-rule="evenodd" d="M 20 30 A 10 10 0 0 1 30 20 H 140 A 10 10 0 0 1 150 30 V 90 A 10 10 0 0 1 140 100 H 30 A 10 10 0 0 1 20 90 V 30 Z M 35 45 A 5 5 0 0 1 40 40 H 130 A 5 5 0 0 1 135 45 V 75 A 5 5 0 0 1 130 80 H 40 A 5 5 0 0 1 35 75 V 45 Z"/><line x1="20" y1="10" x2="150" y2="10" class="dim-line"/><line x1="20" y1="15" x2="20" y2="20" class="ext-line"/><line x1="150" y1="15" x2="150" y2="20" class="ext-line"/><text x="85" y="8" class="label">b</text><line x1="10" y1="20" x2="10" y2="100" class="dim-line"/><line x1="15" y1="20" x2="20" y2="20" class="ext-line"/><line x1="15" y1="100" x2="20" y2="100" class="ext-line"/><text x="5" y="60" class="label">a</text><path d="M20,30 A10,10 0 0 1 30,20" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="30" y1="20" x2="40" y2="10" class="ext-line"/><line x1="40" y1="10" x2="50" y2="0" class="ext-line" /><text x="52" y="0" class="label">r</text><line x1="20" y1="60" x2="35" y2="60" class="dim-line"/><text x="27.5" y="55" class="label">t</text></svg>`,
+        iBeam: `<svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<path class="profile" d="M15,10 h100 v15 h-42.5 c-2.76,0 -5,2.24 -5,5 v60 c0,2.76 2.24,5 5,5 H115 v15 H15 v-15 h42.5 c2.76,0 5,-2.24 5,-5 v-60 c0,-2.76 -2.24,-5 -5,-5 H15 Z" /><line x1="5" y1="10" x2="5" y2="120" class="dim-line"/><text x="0" y="65" class="label" writing-mode="vertical-rl">h</text><line x1="15" y1="5" x2="115" y2="5" class="dim-line"/><text x="65" y="3" class="label">b</text><line x1="120" y1="10" x2="120" y2="25" class="dim-line"/><text x="122" y="17.5" class="label" text-anchor="start">t</text><line x1="60" y1="25" x2="60" y2="105" class="ext-line"/><line x1="70" y1="25" x2="70" y2="105" class="ext-line"/><line x1="60" y1="125" x2="70" y2="125" class="dim-line"/><text x="65" y="129" class="label">s</text><path d="M62.5,30 H55 c-2.76,0 -5,2.24 -5,5 v7.5" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="62.5" y1="30" x2="75" y2="20" class="ext-line"/><text x="77" y="18" class="label">r1</text></svg>`,
+        uChannel: `<svg viewBox="0 0 110 130" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<path class="profile" d="M90,10 h-80 v110 h80 v-10 c0,-2.76 -2.24,-5 -5,-5 H30 c-2.76,0 -5,-2.24 -5,-5 v-70 c0,-2.76 2.24,-5 5,-5 H85 c2.76,0 5,-2.24 5,-5 Z" /><line x1="5" y1="10" x2="5" y2="120" class="dim-line"/><text x="0" y="65" class="label" writing-mode="vertical-rl">h</text><line x1="10" y1="5" x2="90" y2="5" class="dim-line"/><text x="50" y="3" class="label">b</text><line x1="95" y1="10" x2="95" y2="20" class="dim-line"/><text x="97" y="15" class="label" text-anchor="start">t</text><line x1="10" y1="125" x2="25" y2="125" class="dim-line"/><text x="17.5" y="129" class="label">s</text><path d="M32.5,25 H25 c-2.76,0 -5,2.24 -5,5 v7.5" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="32.5" y1="25" x2="45" y2="15" class="ext-line"/><text x="47" y="13" class="label">r1</text><path d="M85,20 h5 v5 c0,2.76 -2.24,5 -5,5" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="90" y1="20" x2="100" y2="10" class="ext-line"/><text x="102" y="8" class="label">r2</text></svg>`,
+        angleProfile: `<svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">${SVG_DEFS}<path class="profile" d="M10,10 h15 c2.76,0 5,2.24 5,5 v85 c0,2.76 -2.24,5 -5,5 H105 c2.76,0 5,2.24 5,5 v5 H10 Z" /><line x1="5" y1="10" x2="5" y2="120" class="dim-line"/><text x="0" y="65" class="label" writing-mode="vertical-rl">a</text><line x1="10" y1="125" x2="110" y2="125" class="dim-line"/><text x="60" y="129" class="label">b</text><line x1="27" y1="10" x2="27" y2="25" class="dim-line" /><text x="32" y="17.5" class="label" text-anchor="start">v</text><path d="M30,22.5 v-7.5 c0,-2.76 -2.24,-5 -5,-5 H17.5" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="30" y1="22.5" x2="40" y2="12.5" class="ext-line"/><text x="42" y="10.5" class="label">r1</text><path d="M105,105 h5 v5 c0,2.76 -2.24,5 -5,5" fill="none" stroke="var(--text-secondary)" stroke-width="0.5"/><line x1="110" y1="105" x2="120" y2="95" class="ext-line"/><text x="122" y="93" class="label">r2</text></svg>`,
     };
 
     // --- DOM Elemek Gyűjtése ---
@@ -23,12 +52,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         'standard-size-container', 'standard-size-select', 'dimension-fields', 'length-input', 'length-unit-toggle',
         'per-meter-results-section', 'results-total-wrapper', 'result-cross-section', 'cross-section-unit-toggle', 'result-weight-meter', 'result-surface-area', 
         'result-total-weight', 'result-total-surface', 'result-total-price', 'total-price-unit-toggle', 
-        'eur-huf-rate', 'exchange-rate-chart-btn', 'price-per-kg', 'price-per-meter', 'price-unit-toggle-kg', 
+        'eur-huf-rate', 'exchange-rate-chart-btn', 'exchange-rate-reset-btn', 'price-per-kg', 'price-per-meter', 'price-unit-toggle-kg', 
         'price-unit-toggle-m', 'manage-materials-btn', 'materials-modal', 
         'chart-popup-overlay', 'chart-popup-content', 'chart-popup-title', 'chart-popup-body',
         'chart-start-date', 'chart-end-date', 'chart-range-1m', 'chart-range-1y',
         'new-material-name', 'new-material-density', 'add-material-btn', 'all-materials-list', 
-        'editing-material-name', 'copyright-year', 'app-version'
+        'editing-material-name', 'copyright-year', 'app-version', 'drawing-section', 'drawing-container'
     ];
     domIds.forEach(id => {
         const camelCaseId = id.replace(/-(\w)/g, (_, c) => c.toUpperCase());
@@ -50,7 +79,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (saved) {
                 try {
                     const loadedState = JSON.parse(saved);
-                    // Ensure pipeDimUnits exists
                     if (!loadedState.pipeDimUnits) {
                         loadedState.pipeDimUnits = { outerDiameter: 'mm', wallThickness: 'mm' };
                     }
@@ -68,9 +96,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch('./data.json');
             if (!response.ok) throw new Error('Network response not ok');
             APP_DATA = await response.json();
+            return true; // Siker
         } catch(error) {
             console.error("Failed to load application data. App cannot start.", error);
             document.body.innerHTML = "Error loading application data. Please try again later.";
+            return false; // Hiba
         }
     }
 
@@ -144,19 +174,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             
     // --- Dinamikus UI Populáció ---
     function populateMaterialSelect() {
-        const { MATERIAL_DENSITIES, MATERIAL_GROUPS, LANG } = APP_DATA;
+        const { MATERIAL_DENSITIES, MATERIAL_GROUPS, PRODUCT_MATERIAL_AVAILABILITY, LANG } = APP_DATA;
         DOMElements.materialSelectOptions.innerHTML = '';
         const allMaterials = { ...MATERIAL_DENSITIES, ...state.customMaterials };
         
-        const createOption = (key) => {
+        const createOption = (key, specialClass = '') => {
             const li = document.createElement('li');
-            li.className = 'option';
+            li.className = `option ${specialClass}`;
             li.dataset.value = key;
-            li.textContent = key;
+            li.textContent = key === 'show-all' ? LANG[state.lang].showAllMaterials : key;
             return li;
         };
 
+        const productType = DOMElements.productTypeSelect.value;
+        const availableGroups = state.materialFilterActive && productType ? PRODUCT_MATERIAL_AVAILABILITY[productType] : Object.keys(MATERIAL_GROUPS);
+
         const createGroup = (labelKey, keys) => {
+            if (!keys || keys.length === 0) return;
             const groupLi = document.createElement('li');
             const header = document.createElement('div');
             header.className = 'group-header';
@@ -182,12 +216,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
         
-        createGroup('favorites', state.favorites, true);
-        createGroup('customMaterials', Object.keys(state.customMaterials).filter(k => !state.favorites.includes(k)), true);
+        createGroup('favorites', state.favorites);
+
+        const customKeys = Object.keys(state.customMaterials).filter(k => !state.favorites.includes(k));
+        createGroup('customMaterials', customKeys);
+        
         Object.keys(MATERIAL_GROUPS).forEach(groupKey => {
-            const members = MATERIAL_GROUPS[groupKey].filter(k => !state.favorites.includes(k) && MATERIAL_DENSITIES[k]);
-            if(members.length > 0) createGroup(groupKey, members);
+            if(availableGroups.includes(groupKey)) {
+                const members = MATERIAL_GROUPS[groupKey].filter(k => !state.favorites.includes(k) && !customKeys.includes(k) && MATERIAL_DENSITIES[k]);
+                if(members.length > 0) createGroup(groupKey, members);
+            }
         });
+
+        if (state.materialFilterActive && productType) {
+            DOMElements.materialSelectOptions.appendChild(createOption('show-all', 'show-all-option'));
+        }
         
         if (state.selectedMaterial && allMaterials[state.selectedMaterial]) {
             selectMaterial(state.selectedMaterial, false);
@@ -199,6 +242,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function selectMaterial(materialName, clearInputs = true) {
         if (!materialName) return;
+        if (materialName === 'show-all') {
+            state.materialFilterActive = false;
+            populateMaterialSelect();
+            DOMElements.materialSelectOptions.classList.add('open');
+            return;
+        }
+
         if(clearInputs) resetDimensionInputs();
 
         const { MATERIAL_DENSITIES } = APP_DATA;
@@ -264,11 +314,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         DOMElements.dimensionFields.innerHTML = '';
         if (!config) {
             updateStandardSizeSelector(null);
+            updateSVGDrawing(null);
             calculate();
             return;
         }
         
-        config.dims.forEach(({ id, unit }) => {
+        config.dims.forEach(({ id, unit, key }) => {
+            const isRadius = key && (key.startsWith('r') || key === 'v');
+            if (isRadius && key !=='v') return; // Don't create inputs for radii, but do for angle profile thickness 'v'
+
             const formGroup = document.createElement('div');
             formGroup.className = 'form-group';
             
@@ -279,8 +333,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                  unitDisplay = `<span>${unit}</span>`;
             }
 
+            const symbol = key ? `(${key})` : '';
+            const labelText = `${LANG[state.lang][id] || id} ${symbol}`;
+
             formGroup.innerHTML = `
-                <label for="dim-${id}">${LANG[state.lang][id] || id}</label>
+                <label for="dim-${id}">${labelText}</label>
                 <div class="dimension-input-group">
                     <input type="number" id="dim-${id}" class="input dimension-input" min="0" step="0.1">
                     ${unitDisplay}
@@ -290,8 +347,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         
         updateStandardSizeSelector(productType);
+        updateSVGDrawing(productType);
         calculate();
     }
+    
+    function updateSVGDrawing(productType) {
+        if (!productType || !SVG_TEMPLATES[productType]) {
+            DOMElements.drawingSection.style.display = 'none';
+            DOMElements.drawingContainer.innerHTML = '';
+            return;
+        }
+        DOMElements.drawingSection.style.display = 'block';
+        DOMElements.drawingContainer.innerHTML = SVG_TEMPLATES[productType];
+    }
+
 
     function updateStandardSizeSelector(productType) {
         const { STANDARD_PROFILES, LANG } = APP_DATA;
@@ -331,12 +400,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if(dims) {
             PRODUCT_TYPES[productType].dims.forEach((dimConfig) => {
+                const isRadius = dimConfig.key && dimConfig.key.startsWith('r');
+                if(isRadius) return;
+                
                 const key = dimConfig.key || dimConfig.id.replace('dim-', '');
                 const input = document.getElementById(`dim-${dimConfig.id}`);
                 if(input && dims[key] !== undefined) {
                     input.value = dims[key];
-                } else if (input && dims[dimConfig.id] !== undefined) {
-                    input.value = dims[dimConfig.id];
                 }
             });
             calculate();
@@ -345,16 +415,47 @@ document.addEventListener('DOMContentLoaded', async () => {
             
     // --- Fő Számítási Logika ---
     function getDimensions() {
+        const { PRODUCT_TYPES, STANDARD_PROFILES } = APP_DATA;
         const values = {};
         const productType = DOMElements.productTypeSelect.value;
-        document.querySelectorAll('.dimension-input').forEach(input => {
-            const id = input.id.replace('dim-', '');
-            let value = parseFloat(input.value) || 0;
-            if (productType === 'pipe' && state.pipeDimUnits[id] === 'inch') {
-                value = value * 25.4;
+        if(!productType) return {};
+
+        const sizeValue = DOMElements.standardSizeSelect.value;
+        const isStandardSize = sizeValue && DOMElements.standardSizeSelect.style.display !== 'none';
+        let standardDims = {};
+        if (isStandardSize) {
+             const [series, size] = sizeValue.split('-');
+             standardDims = STANDARD_PROFILES[productType]?.[series]?.[size] || {};
+        }
+
+        PRODUCT_TYPES[productType].dims.forEach(dimConfig => {
+            const input = document.getElementById(`dim-${dimConfig.id}`);
+            let value;
+            if(input) { // It's a user-editable dimension
+                value = parseFloat(input.value) || 0;
+                if (productType === 'pipe' && state.pipeDimUnits[dimConfig.id] === 'inch') {
+                    value *= 25.4;
+                }
+            } else { // It's a non-editable property like a radius
+                value = standardDims[dimConfig.key] || 0;
             }
-            values[id] = value;
+            values[dimConfig.id] = value;
         });
+
+        // Fallbacks for custom-sized radii
+        if (!isStandardSize) {
+            const t = values.wallThickness || 0;
+            if (values.cornerRadius === 0 && (productType === 'squareProfile' || productType === 'flatProfile')) {
+                values.cornerRadius = t > 0 ? t * 1.5 : (values.sideA || values.width || 0) * 0.1;
+            }
+            if (values.outerCornerRadius === 0 && productType === 'tube') {
+                values.outerCornerRadius = t > 0 ? t * 2 : (values.width || 0) * 0.1;
+            }
+            if (values.filletRadius === 0 && (productType === 'iBeam' || productType === 'uChannel' || productType === 'angleProfile')) {
+                 values.filletRadius = (values.webThickness || t) * 1.5;
+            }
+        }
+
         return values;
     }
             
@@ -372,9 +473,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const lengthValue = parseFloat(DOMElements.lengthInput.value) || 0;
         const lengthM = state.lengthUnit === 'm' ? lengthValue : lengthValue / 1000;
-
-        const perMeterFields = [DOMElements.resultCrossSection, DOMElements.resultWeightMeter, DOMElements.resultSurfaceArea];
-        const totalFields = [DOMElements.resultTotalWeight, DOMElements.resultTotalSurface, DOMElements.resultTotalPrice];
         
         DOMElements.lengthUnitToggle.innerText = state.lengthUnit;
         DOMElements.crossSectionUnitToggle.innerText = (state.crossSectionUnit === 'm2') ? 'm²' : 'mm²';
@@ -394,11 +492,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 DOMElements.resultTotalSurface.innerText = (surfaceAreaPerMeter * lengthM + endCapAreaM2).toFixed(4);
             } else {
                 DOMElements.resultsTotalWrapper.classList.add('results-disabled');
-                totalFields.forEach(field => field.innerText = '');
+                [DOMElements.resultTotalWeight, DOMElements.resultTotalSurface, DOMElements.resultTotalPrice].forEach(field => field.innerText = '');
             }
         } else {
             DOMElements.perMeterResultsSection.classList.add('results-disabled');
-            perMeterFields.forEach(field => field.innerText = '');
+            [DOMElements.resultCrossSection, DOMElements.resultWeightMeter, DOMElements.resultSurfaceArea].forEach(field => field.innerText = '');
 
             DOMElements.lengthInput.disabled = true;
             if(document.activeElement !== DOMElements.lengthInput) {
@@ -406,7 +504,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             DOMElements.resultsTotalWrapper.classList.add('results-disabled');
-            totalFields.forEach(field => field.innerText = '');
+            [DOMElements.resultTotalWeight, DOMElements.resultTotalSurface, DOMElements.resultTotalPrice].forEach(field => field.innerText = '');
         }
         
         updatePrices();
@@ -448,6 +546,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const totalPriceHuf = state.priceHufKg * weightPerMeter * lengthM;
             const totalPriceCurrentCurrency = state.priceCurrency === 'HUF' ? totalPriceHuf : (rate > 0 ? totalPriceHuf / rate : 0);
             DOMElements.resultTotalPrice.innerText = totalPriceCurrentCurrency.toFixed(2);
+        } else {
+             DOMElements.resultTotalPrice.innerText = '';
         }
 
         [DOMElements.priceUnitToggleKg, DOMElements.priceUnitToggleM, DOMElements.totalPriceUnitToggle].forEach(el => el.innerText = state.priceCurrency);
@@ -641,6 +741,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         DOMElements.themeToggle.addEventListener('click', () => applyTheme(state.theme === 'light' ? 'dark' : 'light'));
         DOMElements.resetBtn.addEventListener('click', resetAllInputs);
         
+        document.body.addEventListener('click', (e) => {
+            const target = e.target.closest('.collapsible-header');
+            if (target) {
+                const body = target.nextElementSibling;
+                const icon = target.querySelector('.collapse-icon');
+                if (body && body.classList.contains('card-body')) {
+                    body.classList.toggle('collapsed');
+                    icon.classList.toggle('collapsed');
+                }
+            }
+        });
+
         DOMElements.crossSectionUnitToggle.addEventListener('click', () => {
             state.crossSectionUnit = state.crossSectionUnit === 'mm2' ? 'm2' : 'mm2';
             storage.saveState(); calculate();
@@ -690,6 +802,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         DOMElements.productTypeSelect.addEventListener('change', () => {
             resetDimensionInputs();
+            state.materialFilterActive = true; // Reset filter on product change
+            state.selectedMaterial = null; // Clear material selection
+            populateMaterialSelect();
             updateDimensionFields(); 
             updateProductFavoriteButtonState();
         });
@@ -727,6 +842,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         DOMElements.eurHufRate.addEventListener('input', (e) => {
             state.eurHufRate = parseFloat(e.target.value) || 0;
             storage.saveState(); updatePrices();
+        });
+        DOMElements.exchangeRateResetBtn.addEventListener('click', () => {
+            fetchExchangeRate();
         });
         [DOMElements.pricePerKg, DOMElements.pricePerMeter].forEach(el => el.addEventListener('input', (e) => updatePrices(e)));
 
@@ -808,7 +926,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Alkalmazás Indítása ---
     async function init() {
         storage.loadState();
-        await fetchAppData();
+        const dataLoaded = await fetchAppData();
+        if (!dataLoaded) return; // Leáll, ha az adatok betöltése sikertelen
+
         await fetchHistoricalRates();
         
         const { LANG } = APP_DATA;

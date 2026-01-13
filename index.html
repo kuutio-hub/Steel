@@ -31,7 +31,7 @@
             --text-secondary: #A5ACAF; /* Wolf Grey */
             --border-color: #30363d;
             --highlight-color: #1c3d5e;
-            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-color: rgba(0, 0, 0, 0.4);
             --favorite-color: var(--seahawks-green);
         }
         
@@ -57,6 +57,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-primary);
+            background-image: linear-gradient(to bottom, color-mix(in srgb, var(--bg-primary) 95%, black), var(--bg-primary));
             color: var(--text-primary);
             line-height: 1.5;
             font-size: 14px;
@@ -97,9 +98,6 @@
         .header-title h1 {
             font-size: 1.4rem;
             font-weight: 700;
-        }
-
-        .header-title h1 {
             color: var(--bg-accent);
             text-shadow: 0 0 8px color-mix(in srgb, var(--bg-accent) 50%, transparent);
         }
@@ -119,7 +117,7 @@
             background-color: var(--bg-secondary);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
-            padding: 0.4rem;
+            padding: 0.5rem;
             border-radius: 6px;
             cursor: pointer;
             display: flex;
@@ -131,27 +129,31 @@
         .control-btn:hover {
             background-color: var(--bg-tertiary);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px var(--shadow-color);
+            box-shadow: 0 4px 12px var(--shadow-color);
         }
         
         .control-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
+        }
+        #reset-btn {
+            padding: 0.6rem;
         }
         #reset-btn svg {
-             width: 22px;
-            height: 22px;
+             width: 24px;
+            height: 24px;
         }
 
         .lang-select {
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
-            padding-right: 1.8rem;
+            padding: 0.5rem;
+            padding-right: 2rem;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A5ACAF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 0.4rem center;
-            background-size: 14px;
+            background-position: right 0.5rem center;
+            background-size: 16px;
         }
 
         [data-theme="light"] .lang-select {
@@ -171,521 +173,198 @@
             }
         }
         
-        .resizer {
-            background-color: var(--bg-tertiary);
-            cursor: col-resize;
-            border-radius: 5px;
-            transition: background-color 0.2s;
-        }
-        
-        .resizer:hover {
-            background-color: var(--bg-accent);
-        }
-        
-        @media (max-width: 991px) {
-            .resizer {
-                display: none;
-            }
-        }
+        .resizer { background-color: var(--bg-tertiary); cursor: col-resize; border-radius: 5px; transition: background-color 0.2s; }
+        .resizer:hover { background-color: var(--bg-accent); }
+        @media (max-width: 991px) { .resizer { display: none; } }
 
         .card {
             background-color: var(--bg-secondary);
-            border-radius: 8px;
-            box-shadow: 0 1px 3px var(--shadow-color);
-            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 1.25rem;
             min-width: 0;
             display: flex;
             flex-direction: column;
             gap: 1rem;
+            transition: box-shadow 0.3s;
+        }
+        
+        .card:hover {
+             box-shadow: 0 8px 24px var(--shadow-color);
         }
         
         .card-header {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding-bottom: 0.6rem;
+            padding-bottom: 0.75rem;
             border-bottom: 1px solid var(--border-color);
         }
         
+        .collapsible-header {
+            cursor: pointer;
+        }
+
         .card-header-icon {
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
+            background-color: var(--bg-tertiary); color: var(--text-primary); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .card-header-icon svg { width: 20px; height: 20px; }
+        .card-header h2 { font-size: 1.2rem; font-weight: 700; color: var(--bg-accent); text-shadow: 0 0 8px color-mix(in srgb, var(--bg-accent) 40%, transparent); }
+        [data-theme="light"] .card-header h2 { color: var(--seahawks-navy); text-shadow: none; }
+
+        .collapse-icon {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+        }
+        .collapse-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+        .card-body {
+            transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out, margin 0.4s, padding 0.4s;
+            overflow: hidden;
+            max-height: 2000px; /* Large enough for content */
+            opacity: 1;
         }
 
-        .card-header-icon svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        .card-header h2 {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .card-header h2 {
-            color: var(--bg-accent);
-            text-shadow: 0 0 6px color-mix(in srgb, var(--bg-accent) 40%, transparent);
-        }
-        [data-theme="light"] .card-header h2 {
-            color: var(--seahawks-navy);
-            text-shadow: none;
-        }
-
-
-        .form-group {
-            margin-bottom: 0.8rem;
+        .card-body.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-top: -1rem; /* Adjust to pull content up */
         }
         
-        .form-group label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 0.3rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: var(--text-secondary); }
 
         .input, .select, .custom-select-display {
-            width: 100%;
-            padding: 0.4rem 0.6rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+            width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-primary); color: var(--text-primary); font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
         }
 
-        .input:hover, .select:hover, .custom-select-display:hover {
-             border-color: color-mix(in srgb, var(--bg-accent) 50%, var(--border-color));
-        }
+        .input:hover, .select:hover, .custom-select-display:hover { border-color: color-mix(in srgb, var(--bg-accent) 50%, var(--border-color)); }
+        .input:disabled { background-color: var(--bg-tertiary); cursor: not-allowed; opacity: 0.7; }
+        .select-wrapper { display: flex; gap: 0.5rem; align-items: center; }
         
-        .input:disabled {
-            background-color: var(--bg-tertiary);
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-        
-        .select-wrapper {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        
-        #product-type-select {
-            max-width: 250px;
-        }
-
-        @media (max-width: 576px) {
-            #product-type-select {
-                max-width: 100%;
-            }
-        }
-        
-        .dimension-input-group .input, #length-input, #eur-huf-rate {
-            max-width: 150px;
-        }
-
         .input:focus, .select:focus, .custom-select-display:focus {
             outline: none;
             border-color: var(--bg-accent);
-            box-shadow: 0 0 0 3px color-mix(in srgb, var(--bg-accent) 25%, transparent), 0 0 10px color-mix(in srgb, var(--bg-accent) 50%, transparent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--bg-accent) 25%, transparent), 0 0 12px color-mix(in srgb, var(--bg-accent) 60%, transparent);
         }
 
         .dimension-input-group {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-        }
-
-        .dimension-input-group .input {
-            text-align: right;
-        }
-
-        .dimension-input-group span {
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .dimension-fields-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 0.8rem;
-            margin-top: 1rem;
-        }
-        
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 0.8rem;
-        }
-        
-        .card-section {
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
-            transition: opacity 0.3s;
-        }
-        .card-section:first-child {
-            padding-top: 0;
-            border-top: none;
-        }
-        
-        .results-disabled {
-             opacity: 0.4;
-            pointer-events: none;
-        }
-        
-        .card-section h3 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        .result-item {
-            background-color: var(--bg-primary);
-            padding: 0.6rem 0.8rem;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-        }
-        
-        .result-item-label {
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            margin-bottom: 0.2rem;
-        }
-        
-        .result-item-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            word-break: break-all;
-            min-height: 1.2em; /* Prevents layout shift when text is empty */
-        }
-        
-        .result-item-value .unit {
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            margin-left: 0.25rem;
-        }
-        
-        .unit-toggle, .pipe-unit-toggle {
-            cursor: pointer;
-            border-bottom: 1px dashed var(--text-secondary);
-            transition: background-color 0.2s, color 0.2s;
-            border-radius: 4px;
-            padding: 0.1rem 0.3rem;
-            font-weight: 600;
-        }
-
-        .unit-toggle:hover, .pipe-unit-toggle:hover {
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-        .pipe-unit-toggle {
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-tertiary);
-            padding: 0 0.4rem;
-            margin-left: 0.2rem;
-            font-size: 0.8rem;
-        }
-        
-        .currency-panel {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        
-        .currency-panel .input {
-            text-align: right;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.5rem 0.8rem;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.2s, opacity 0.2s, transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px var(--shadow-color);
-        }
-
-        #add-material-form .btn {
-            width: auto;
-            padding: 0.3rem 0.8rem;
-        }
-        
-        .btn-full-width {
-            width: 100%;
-        }
-
-        .btn-primary {
-            background-color: var(--bg-accent);
-            color: var(--seahawks-navy);
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-            box-shadow: 0 4px 12px var(--shadow-color), 0 0 12px color-mix(in srgb, var(--bg-accent) 60%, transparent);
-        }
-        
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background-color: var(--bg-secondary);
-            padding: 1.5rem;
-            border-radius: 8px;
-            max-width: 90%;
-            width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #chart-popup-content {
-            width: 800px;
-            max-width: 95%;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-header h3 {
-            font-size: 1.25rem;
-        }
-        
-        .modal-close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-secondary);
-        }
-
-        .material-list {
-            list-style: none;
-            max-height: 250px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 0.5rem;
-        }
-        
-        #add-material-form div {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            align-items: flex-end;
-        }
-        #add-material-form .input {
-            flex: 1;
-        }
-
-        .material-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-        .material-list-item:hover {
-            background-color: var(--highlight-color);
-        }
-        
-        .material-list-item:last-child {
-            border-bottom: none;
-        }
-        
-        .material-info {
-           display: flex;
-           align-items: center;
-           gap: 0.75rem;
-        }
-        
-        .material-actions button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            margin-left: 0.5rem;
-            color: var(--text-secondary);
-            padding: 0.25rem;
-            border-radius: 4px;
-            transition: color 0.2s, background-color 0.2s;
-        }
-
-        .material-actions button:hover {
-            color: var(--text-primary);
-            background-color: var(--bg-tertiary);
-        }
-        
-        .favorite-btn, #favorite-toggle-btn, #product-favorite-toggle-btn {
-            color: var(--text-secondary);
-        }
-        .favorite-btn.is-favorite, #favorite-toggle-btn.is-favorite, #product-favorite-toggle-btn.is-favorite {
-            color: var(--favorite-color);
-        }
-        .favorite-btn.is-favorite svg, #favorite-toggle-btn.is-favorite svg, #product-favorite-toggle-btn.is-favorite svg {
-            fill: var(--favorite-color);
-        }
-
-        .footer {
-            text-align: center;
-            padding: 1rem 0;
-            border-top: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            margin-top: auto;
-            width: 100%;
-        }
-        
-        /* Custom Select */
-        .custom-select-container {
-            position: relative;
-            width: 100%;
-            max-width: 250px;
-        }
-        @media (max-width: 576px) {
-            .custom-select-container {
-                max-width: 100%;
-            }
-        }
-        
-        .custom-select-display {
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .custom-select-display::after {
-            content: '▼';
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            transition: transform 0.2s;
-        }
-        .custom-select-options.open ~ .custom-select-display::after {
-            transform: rotate(180deg);
-        }
-        
-        .custom-select-options {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            margin-top: 4px;
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-            list-style: none;
-            box-shadow: 0 4px 12px var(--shadow-color);
-        }
-        
-        .custom-select-options.open {
-            display: block;
-        }
-        
-        .custom-select-options .group-header {
-            font-weight: bold;
-            padding: 0.5rem 0.8rem;
-            cursor: pointer;
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            position: relative;
-        }
-
-        .custom-select-options .group-header::before {
-            content: '►';
-            margin-right: 0.5rem;
-            font-size: 0.6rem;
-            display: inline-block;
-            transition: transform 0.2s;
-        }
-        
-        .custom-select-options .group-header.expanded::before {
-            transform: rotate(90deg);
-        }
-
-        .custom-select-options .option-list {
-            list-style: none;
-            padding-left: 0;
-            display: none;
-        }
-        
-        .custom-select-options .option-list.expanded {
-            display: block;
-        }
-
-        .custom-select-options .option {
-            padding: 0.5rem 0.8rem 0.5rem 1.5rem;
-            cursor: pointer;
-            transition: background-color 0.2s, color 0.2s, transform 0.2s;
-        }
-        
-        .custom-select-options .option:hover {
-            background-color: var(--highlight-color);
-            color: var(--bg-accent);
-            transform: translateX(4px);
-        }
-        .custom-select-options .option.selected {
-            background-color: var(--highlight-color);
-            font-weight: 600;
-        }
-
-        .chart-controls {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            align-items: center;
             flex-wrap: wrap;
         }
-        .chart-controls .input {
-            max-width: 150px;
+
+        .dimension-input-group .input { text-align: right; flex: 1 1 100px; }
+        .dimension-input-group span { color: var(--text-secondary); font-weight: 500; }
+        .dimension-fields-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
+        
+        .card-section { padding-top: 1rem; border-top: 1px solid var(--border-color); transition: opacity 0.3s; }
+        .card-section:first-child { padding-top: 0; border-top: none; }
+        .results-disabled { opacity: 0.4; pointer-events: none; }
+        .card-section h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text-secondary); }
+
+        .result-item { background-color: var(--bg-primary); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border-color); }
+        .result-item-label { color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.2rem; }
+        .result-item-value { font-size: 1.2rem; font-weight: 700; word-break: break-all; min-height: 1.2em; }
+        .result-item-value .unit { font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); margin-left: 0.25rem; }
+        
+        .unit-toggle, .pipe-unit-toggle {
+            cursor: pointer; border-bottom: 1px dashed var(--text-secondary); transition: background-color 0.2s, color 0.2s; border-radius: 4px; padding: 0.1rem 0.3rem; font-weight: 600;
         }
-        .chart-controls .btn {
-            padding: 0.4rem 0.6rem;
+        .unit-toggle.disabled { cursor: default; border-bottom: none; opacity: 0.6; }
+        .unit-toggle:not(.disabled):hover, .pipe-unit-toggle:hover { background-color: var(--bg-tertiary); color: var(--text-primary); }
+        
+        .pipe-unit-toggle {
+            border: 1px solid var(--border-color); background-color: var(--bg-tertiary); padding: 0 0.5rem; margin-left: 0.2rem; font-size: 0.85rem; height: 100%;
         }
+        
+        .currency-panel { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;}
+        .currency-panel .input { flex: 1; min-width: 100px; text-align: right; }
+        .hidden { display: none !important; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.6rem 1rem; border: none; border-radius: 6px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background-color 0.2s, opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px var(--shadow-color); }
+        .btn-primary { background-color: var(--bg-accent); color: var(--seahawks-navy); }
+        .btn-primary:hover {
+            opacity: 0.9;
+            box-shadow: 0 6px 16px var(--shadow-color), 0 0 15px color-mix(in srgb, var(--bg-accent) 70%, transparent);
+        }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background-color: var(--bg-secondary); padding: 2rem; border-radius: 12px; max-width: 90%; width: 600px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column;
+        }
+        #chart-popup-content { width: 800px; max-width: 95%; }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .modal-header h3 { font-size: 1.5rem; }
+        .modal-close-btn { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-secondary); }
+
+        .material-list { list-style: none; max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem; }
+        #add-material-form div { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: flex-end; }
+        #add-material-form .input { flex: 1; }
+
+        .material-list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid var(--border-color); border-radius: 4px; transition: background-color 0.2s; }
+        .material-list-item:hover { background-color: var(--highlight-color); }
+        .material-list-item:last-child { border-bottom: none; }
+        .material-info { display: flex; align-items: center; gap: 0.75rem; }
+        .material-actions button { background: none; border: none; cursor: pointer; margin-left: 0.5rem; color: var(--text-secondary); padding: 0.25rem; border-radius: 4px; transition: color 0.2s, background-color 0.2s; }
+        .material-actions button:hover { color: var(--text-primary); background-color: var(--bg-tertiary); }
+        
+        .favorite-btn, #favorite-toggle-btn, #product-favorite-toggle-btn { color: var(--text-secondary); }
+        .favorite-btn.is-favorite, #favorite-toggle-btn.is-favorite, #product-favorite-toggle-btn.is-favorite { color: var(--favorite-color); }
+        .favorite-btn.is-favorite svg, #favorite-toggle-btn.is-favorite svg, #product-favorite-toggle-btn.is-favorite svg { fill: var(--favorite-color); }
+
+        .footer { text-align: center; padding: 1.5rem 0; border-top: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.85rem; margin-top: auto; width: 100%; }
+        
+        /* Custom Select */
+        .custom-select-container { position: relative; width: 100%; }
+        .custom-select-display { cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .custom-select-display::after { content: '▼'; font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.2s; }
+        .custom-select-options.open ~ .custom-select-display::after { transform: rotate(180deg); }
+        .custom-select-options {
+            position: absolute; top: 100%; left: 0; right: 0; background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; margin-top: 4px; max-height: 400px; overflow-y: auto; z-index: 100; display: none; list-style: none; box-shadow: 0 8px 16px var(--shadow-color);
+        }
+        .custom-select-options.open { display: block; }
+        .custom-select-options .group-header { font-weight: bold; padding: 0.6rem 1rem; cursor: pointer; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; position: relative; }
+        .custom-select-options .group-header::before { content: '►'; margin-right: 0.5rem; font-size: 0.6rem; display: inline-block; transition: transform 0.2s; }
+        .custom-select-options .group-header.expanded::before { transform: rotate(90deg); }
+        .custom-select-options .option-list { list-style: none; padding-left: 0; display: none; }
+        .custom-select-options .option-list.expanded { display: block; }
+        .custom-select-options .option { padding: 0.6rem 1rem 0.6rem 1.8rem; cursor: pointer; transition: background-color 0.2s, color 0.2s, transform 0.2s; }
+        .custom-select-options .option:hover { background-color: var(--highlight-color); color: var(--bg-accent); transform: translateX(5px); }
+        .custom-select-options .option.selected { background-color: var(--highlight-color); font-weight: 600; }
+        .custom-select-options .option.show-all-option { font-style: italic; color: var(--text-secondary); border-top: 1px solid var(--border-color); margin-top: 4px; padding-top: 8px;}
+
+        .chart-controls { display: flex; gap: 0.5rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+        .chart-controls .input { max-width: 150px; }
+        .chart-controls .btn { padding: 0.4rem 0.6rem; }
+
+        #drawing-container {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        #drawing-container svg {
+            max-width: 100%;
+            height: auto;
+            max-height: 250px;
+        }
+
     </style>
 </head>
 <body>
@@ -709,45 +388,64 @@
 
         <main id="main-container">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header collapsible-header" id="input-card-header">
                      <div class="card-header-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
                     </div>
                     <h2 data-lang-key="inputParameters">Bemeneti paraméterek</h2>
+                    <div class="collapse-icon">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="material-select" data-lang-key="material">Anyag</label>
-                    <div class="select-wrapper">
-                         <div id="material-select-custom" class="custom-select-container">
-                            <div class="custom-select-display" tabindex="0"></div>
-                            <ul class="custom-select-options"></ul>
+                <div class="card-body" id="input-card-body">
+                    <div class="form-group">
+                        <label for="product-type-select" data-lang-key="productType">Terméktípus</label>
+                         <div class="select-wrapper">
+                            <select id="product-type-select" class="select"></select>
+                            <button id="product-favorite-toggle-btn" class="control-btn" data-lang-title="toggleFavorite">
+                               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </button>
                         </div>
-                        <button id="favorite-toggle-btn" class="control-btn" data-lang-title="toggleFavorite">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                        </button>
-                        <button id="manage-materials-btn" class="control-btn" data-lang-title="manageMaterials">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                        </button>
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="product-type-select" data-lang-key="productType">Terméktípus</label>
-                     <div class="select-wrapper">
-                        <select id="product-type-select" class="select"></select>
-                        <button id="product-favorite-toggle-btn" class="control-btn" data-lang-title="toggleFavorite">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                        </button>
+                    
+                    <div class="form-group">
+                        <label for="material-select" data-lang-key="material">Anyag</label>
+                        <div class="select-wrapper">
+                             <div id="material-select-custom" class="custom-select-container">
+                                <div class="custom-select-display" tabindex="0"></div>
+                                <ul class="custom-select-options"></ul>
+                            </div>
+                            <button id="favorite-toggle-btn" class="control-btn" data-lang-title="toggleFavorite">
+                               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </button>
+                            <button id="manage-materials-btn" class="control-btn" data-lang-title="manageMaterials">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </button>
+                        </div>
                     </div>
-                </div>
-                
-                <div id="standard-size-container" class="form-group" style="display: none;">
-                    <label for="standard-size-select" data-lang-key="standardSize">Szabványméret</label>
-                    <select id="standard-size-select" class="select"></select>
-                </div>
+                    
+                    <div id="standard-size-container" class="form-group" style="display: none;">
+                        <label for="standard-size-select" data-lang-key="standardSize">Szabványméret</label>
+                        <select id="standard-size-select" class="select"></select>
+                    </div>
 
-                <div id="dimension-fields" class="dimension-fields-container"></div>
+                    <div id="dimension-fields" class="dimension-fields-container"></div>
+
+                    <div id="drawing-section" class="card-section" style="display: none;">
+                         <div class="collapsible-header" id="drawing-card-header">
+                            <div style="display:flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <h3 data-lang-key="technicalDrawing">Műszaki rajz</h3>
+                                <div class="collapse-icon">
+                                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body" id="drawing-card-body">
+                            <div id="drawing-container"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="resizer" id="resizer"></div>
@@ -759,20 +457,34 @@
                     </div>
                     <h2 data-lang-key="results">Számítási eredmények</h2>
                 </div>
-
-                <div class="card-section">
-                    <h3 data-lang-key="priceCalculation">Árszámítás</h3>
-                    <div class="form-group">
-                        <label for="eur-huf-rate" data-lang-key="exchangeRate">Árfolyam</label>
-                        <div class="currency-panel">
-                            <input type="number" id="eur-huf-rate" class="input" min="0" step="0.01">
-                            <span>EUR/HUF</span>
-                            <button id="exchange-rate-chart-btn" class="control-btn" data-lang-title="exchangeRateChart">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                            </button>
+                
+                 <div class="card-section">
+                    <div id="exchange-rate-section">
+                        <div class="collapsible-header" id="exchange-rate-header">
+                             <div style="display:flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <h3 data-lang-key="exchangeRate">Árfolyam</h3>
+                                <div class="collapse-icon collapsed">
+                                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body collapsed" id="exchange-rate-body">
+                             <div id="exchange-rate-group" class="form-group">
+                                <div class="currency-panel">
+                                    <input type="number" id="eur-huf-rate" class="input" min="0" step="0.01">
+                                    <span>EUR/HUF</span>
+                                     <button id="exchange-rate-reset-btn" class="control-btn" data-lang-title="reset">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3L22 2M22 12.5a10 10 0 0 1-18.8 4.3L2 22"/></svg>
+                                    </button>
+                                    <button id="exchange-rate-chart-btn" class="control-btn" data-lang-title="exchangeRateChart">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="results-grid">
+
+                    <div class="results-grid" id="price-inputs-grid">
                         <div class="form-group">
                             <label for="price-per-kg" data-lang-key="pricePerKg">Ár / kg</label>
                             <div class="dimension-input-group">
@@ -836,7 +548,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </main>
         

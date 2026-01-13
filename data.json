@@ -23,37 +23,85 @@
     "specialAlloys": ["Inconel 718", "Monel 400"],
     "plastics": ["POM (Delrin)", "PA6", "PA66", "PTFE (Teflon)", "PVC", "PE-HD"]
   },
+   "PRODUCT_MATERIAL_AVAILABILITY": {
+    "roundProfile": ["structuralSteels", "stainlessSteels", "toolSteels", "lightMetals", "nonFerrousMetals", "plastics"],
+    "squareProfile": ["structuralSteels", "stainlessSteels", "lightMetals", "nonFerrousMetals", "plastics"],
+    "flatProfile": ["structuralSteels", "stainlessSteels", "lightMetals", "nonFerrousMetals", "plastics"],
+    "pipe": ["structuralSteels", "stainlessSteels", "lightMetals", "nonFerrousMetals"],
+    "tube": ["structuralSteels", "stainlessSteels", "lightMetals"],
+    "iBeam": ["structuralSteels"],
+    "uChannel": ["structuralSteels"],
+    "angleProfile": ["structuralSteels", "stainlessSteels", "lightMetals"]
+  },
   "STANDARD_PROFILES": {
     "iBeam": {
-      "IPE": { "80": { "h": 80, "w": 46, "t": 3.8, "s": 5.2 }, "100": { "h": 100, "w": 55, "t": 4.1, "s": 5.7 }, "120": { "h": 120, "w": 64, "t": 4.4, "s": 6.3 }, "140": { "h": 140, "w": 73, "t": 4.7, "s": 6.9 }, "160": { "h": 160, "w": 82, "t": 5.0, "s": 7.4 }, "180": { "h": 180, "w": 91, "t": 5.3, "s": 8.0 }, "200": { "h": 200, "w": 100, "t": 5.6, "s": 8.5 } },
-      "HEB": { "100": { "h": 100, "w": 100, "t": 6, "s": 10 }, "120": { "h": 120, "w": 120, "t": 6.5, "s": 11 }, "140": { "h": 140, "w": 140, "t": 7, "s": 12 }, "160": { "h": 160, "w": 160, "t": 8, "s": 13 }, "180": { "h": 180, "w": 180, "t": 8.5, "s": 14 }, "200": { "h": 200, "w": 200, "t": 9, "s": 15 } },
-      "HEA": { "100": { "h": 96, "w": 100, "t": 5, "s": 8 }, "120": { "h": 114, "w": 120, "t": 5, "s": 8 }, "140": { "h": 133, "w": 140, "t": 5.5, "s": 8.5 }, "160": { "h": 152, "w": 160, "t": 6, "s": 9 }, "180": { "h": 171, "w": 180, "t": 6, "s": 9.5 }, "200": { "h": 190, "w": 200, "t": 6.5, "s": 10 } }
+      "IPE": {
+        "80": { "h": 80, "b": 46, "s": 3.8, "t": 5.2, "r1": 5 },
+        "100": { "h": 100, "b": 55, "s": 4.1, "t": 5.7, "r1": 7 },
+        "120": { "h": 120, "b": 64, "s": 4.4, "t": 6.3, "r1": 7 },
+        "140": { "h": 140, "b": 73, "s": 4.7, "t": 6.9, "r1": 7 },
+        "160": { "h": 160, "b": 82, "s": 5.0, "t": 7.4, "r1": 9 },
+        "180": { "h": 180, "b": 91, "s": 5.3, "t": 8.0, "r1": 9 },
+        "200": { "h": 200, "b": 100, "s": 5.6, "t": 8.5, "r1": 11 }
+      },
+      "HEB": {
+        "100": { "h": 100, "b": 100, "s": 6, "t": 10, "r1": 12 },
+        "120": { "h": 120, "b": 120, "s": 6.5, "t": 11, "r1": 12 },
+        "140": { "h": 140, "b": 140, "s": 7, "t": 12, "r1": 15 },
+        "160": { "h": 160, "b": 160, "s": 8, "t": 13, "r1": 15 },
+        "180": { "h": 180, "b": 180, "s": 8.5, "t": 14, "r1": 18 },
+        "200": { "h": 200, "b": 200, "s": 9, "t": 15, "r1": 18 }
+      },
+      "HEA": {
+        "100": { "h": 96, "b": 100, "s": 5, "t": 8, "r1": 12 },
+        "120": { "h": 114, "b": 120, "s": 5, "t": 8, "r1": 12 },
+        "140": { "h": 133, "b": 140, "s": 5.5, "t": 8.5, "r1": 15 },
+        "160": { "h": 152, "b": 160, "s": 6, "t": 9, "r1": 15 },
+        "180": { "h": 171, "b": 180, "s": 6, "t": 9.5, "r1": 18 },
+        "200": { "h": 190, "b": 200, "s": 6.5, "t": 10, "r1": 18 }
+      }
     },
     "uChannel": {
-      "UNP": { "80": { "h": 80, "w": 45, "t": 6, "s": 8 }, "100": { "h": 100, "w": 50, "t": 6, "s": 8.5 }, "120": { "h": 120, "w": 55, "t": 7, "s": 9 }, "140": { "h": 140, "w": 60, "t": 7, "s": 10 }, "160": { "h": 160, "w": 65, "t": 7.5, "s": 10.5 }, "180": { "h": 180, "w": 70, "t": 8, "s": 11 }, "200": { "h": 200, "w": 75, "t": 8.5, "s": 11.5 } }
+      "UNP": {
+        "80": { "h": 80, "b": 45, "s": 6, "t": 8, "r1": 8, "r2": 4 },
+        "100": { "h": 100, "b": 50, "s": 6, "t": 8.5, "r1": 8.5, "r2": 4.5 },
+        "120": { "h": 120, "b": 55, "s": 7, "t": 9, "r1": 9, "r2": 4.5 },
+        "140": { "h": 140, "b": 60, "s": 7, "t": 10, "r1": 10, "r2": 5 },
+        "160": { "h": 160, "b": 65, "s": 7.5, "t": 10.5, "r1": 10.5, "r2": 5.5 },
+        "180": { "h": 180, "b": 70, "s": 8, "t": 11, "r1": 11, "r2": 5.5 },
+        "200": { "h": 200, "b": 75, "s": 8.5, "t": 11.5, "r1": 11.5, "r2": 6 }
+      }
     },
     "angleProfile": {
       "equalLegAngle": {
-        "20x3": { "h": 20, "w": 20, "t": 3 }, "25x3": { "h": 25, "w": 25, "t": 3 }, "30x3": { "h": 30, "w": 30, "t": 3 },
-        "40x4": { "h": 40, "w": 40, "t": 4 }, "50x5": { "h": 50, "w": 50, "t": 5 }, "60x6": { "h": 60, "w": 60, "t": 6 },
-        "80x8": { "h": 80, "w": 80, "t": 8 }, "100x10": { "h": 100, "w": 100, "t": 10 }
+        "20x3": { "a": 20, "b": 20, "v": 3, "r1": 3.5, "r2": 1.8 },
+        "25x3": { "a": 25, "b": 25, "v": 3, "r1": 3.5, "r2": 1.8 },
+        "30x3": { "a": 30, "b": 30, "v": 3, "r1": 5, "r2": 2.5 },
+        "40x4": { "a": 40, "b": 40, "v": 4, "r1": 6, "r2": 3 },
+        "50x5": { "a": 50, "b": 50, "v": 5, "r1": 7, "r2": 3.5 },
+        "60x6": { "a": 60, "b": 60, "v": 6, "r1": 8, "r2": 4 },
+        "80x8": { "a": 80, "b": 80, "v": 8, "r1": 10, "r2": 5 },
+        "100x10": { "a": 100, "b": 100, "v": 10, "r1": 12, "r2": 6 }
       },
       "unequalLegAngle": {
-        "30x20x3": { "h": 30, "w": 20, "t": 3}, "40x20x4": { "h": 40, "w": 20, "t": 4},
-        "50x30x5": { "h": 50, "w": 30, "t": 5}, "60x40x6": { "h": 60, "w": 40, "t": 6},
-        "80x60x8": { "h": 80, "w": 60, "t": 8}, "100x50x8": { "h": 100, "w": 50, "t": 8}
+        "30x20x3": { "a": 30, "b": 20, "v": 3, "r1": 5, "r2": 2.5 },
+        "40x20x4": { "a": 40, "b": 20, "v": 4, "r1": 6, "r2": 3 },
+        "50x30x5": { "a": 50, "b": 30, "v": 5, "r1": 7, "r2": 3.5 },
+        "60x40x6": { "a": 60, "b": 40, "v": 6, "r1": 8, "r2": 4 },
+        "80x60x8": { "a": 80, "b": 60, "v": 8, "r1": 10, "r2": 5 },
+        "100x50x8": { "a": 100, "b": 50, "v": 8, "r1": 12, "r2": 6 }
       }
     }
   },
   "PRODUCT_TYPES": {
-    "roundProfile": { "dims": [{ "id": "diameter", "unit": "mm" }] },
-    "squareProfile": { "dims": [{ "id": "sideA", "unit": "mm" }] },
-    "flatProfile": { "dims": [{ "id": "width", "unit": "mm" }, { "id": "height", "unit": "mm" }] },
-    "pipe": { "dims": [{ "id": "outerDiameter", "unit": "mm" }, { "id": "wallThickness", "unit": "mm" }] },
-    "tube": { "dims": [{ "id": "width", "unit": "mm" }, { "id": "height", "unit": "mm" }, { "id": "wallThickness", "unit": "mm" }] },
-    "iBeam": { "dims": [{ "id": "height", "unit": "mm", "key": "h" }, { "id": "width", "unit": "mm", "key": "w" }, { "id": "webThickness", "unit": "mm", "key": "t" }, { "id": "flangeThickness", "unit": "mm", "key": "s" }] },
-    "uChannel": { "dims": [{ "id": "height", "unit": "mm", "key": "h" }, { "id": "width", "unit": "mm", "key": "w" }, { "id": "webThickness", "unit": "mm", "key": "t" }, { "id": "flangeThickness", "unit": "mm", "key": "s" }] },
-    "angleProfile": { "dims": [{ "id": "height", "unit": "mm", "key": "h" }, { "id": "width", "unit": "mm", "key": "w" }, { "id": "wallThickness", "unit": "mm", "key": "t" }] }
+    "roundProfile": { "dims": [{ "id": "diameter", "unit": "mm", "key": "d" }] },
+    "squareProfile": { "dims": [{ "id": "sideA", "unit": "mm", "key": "a" }, {"id": "cornerRadius", "unit": "mm", "key": "r"}] },
+    "flatProfile": { "dims": [{ "id": "width", "unit": "mm", "key": "b" }, { "id": "height", "unit": "mm", "key": "a" }, {"id": "cornerRadius", "unit": "mm", "key": "r"}] },
+    "pipe": { "dims": [{ "id": "outerDiameter", "unit": "mm", "key": "D" }, { "id": "wallThickness", "unit": "mm", "key": "t" }] },
+    "tube": { "dims": [{ "id": "width", "unit": "mm", "key": "b" }, { "id": "height", "unit": "mm", "key": "a" }, { "id": "wallThickness", "unit": "mm", "key": "t" }, {"id": "outerCornerRadius", "unit": "mm", "key": "r"}] },
+    "iBeam": { "dims": [{ "id": "height", "unit": "mm", "key": "h" }, { "id": "width", "unit": "mm", "key": "b" }, { "id": "webThickness", "unit": "mm", "key": "s" }, { "id": "flangeThickness", "unit": "mm", "key": "t" }, {"id": "filletRadius", "unit": "mm", "key": "r1"}] },
+    "uChannel": { "dims": [{ "id": "height", "unit": "mm", "key": "h" }, { "id": "width", "unit": "mm", "key": "b" }, { "id": "webThickness", "unit": "mm", "key": "s" }, { "id": "flangeThickness", "unit": "mm", "key": "t" }, {"id": "filletRadius", "unit": "mm", "key": "r1"}, {"id": "flangeTipRadius", "unit": "mm", "key": "r2"}] },
+    "angleProfile": { "dims": [{ "id": "height", "unit": "mm", "key": "a" }, { "id": "width", "unit": "mm", "key": "b" }, { "id": "wallThickness", "unit": "mm", "key": "v" }, {"id": "filletRadius", "unit": "mm", "key": "r1"}, {"id": "legTipRadius", "unit": "mm", "key": "r2"}] }
   },
   "LANG": {
     "hu": {
@@ -70,10 +118,11 @@
       "equalLegAngle": "Egyenlő szárú", "unequalLegAngle": "Egyenlőtlen szárú",
       "standardSize": "Szabványméret", "selectSize": "Válassz méretet",
       "diameter": "Átmérő", "sideA": "Oldalhossz", "width": "Szélesség", "height": "Magasság", "outerDiameter": "Külső átmérő", "wallThickness": "Falvastagság", "length": "Hossz",
-      "webThickness": "Gerinc vastagság", "flangeThickness": "Öv vastagság",
+      "webThickness": "Gerinc vastagság", "flangeThickness": "Öv vastagság", "cornerRadius": "Sarokrádiusz", "outerCornerRadius": "Külső sarokrádiusz", "filletRadius": "Hajlatrádiusz", "flangeTipRadius": "Övvég rádiusz", "legTipRadius": "Szárvég rádiusz",
       "oneMonth": "1 Hónap", "oneYear": "1 Év",
       "resetAll": "Mindent töröl", "exchangeRate": "Árfolyam",
-      "selectMaterial": "Válassz anyagot...", "selectProduct": "Válassz terméket..."
+      "selectMaterial": "Válassz anyagot...", "selectProduct": "Válassz terméket...", "showAllMaterials": "Minden anyag mutatása...",
+      "technicalDrawing": "Műszaki rajz", "reset": "Visszaállítás"
     },
     "en": {
       "title": "Metal Calculator", "inputParameters": "Input Parameters", "material": "Material", "productType": "Product Type", "results": "Calculation Results",
@@ -89,10 +138,11 @@
       "equalLegAngle": "Equal Leg", "unequalLegAngle": "Unequal Leg",
       "standardSize": "Standard Size", "selectSize": "Select a size",
       "diameter": "Diameter", "sideA": "Side length", "width": "Width", "height": "Height", "outerDiameter": "Outer Diameter", "wallThickness": "Wall Thickness", "length": "Length",
-      "webThickness": "Web Thickness", "flangeThickness": "Flange Thickness",
+      "webThickness": "Web Thickness", "flangeThickness": "Flange Thickness", "cornerRadius": "Corner Radius", "outerCornerRadius": "Outer Corner Radius", "filletRadius": "Fillet Radius", "flangeTipRadius": "Flange Tip Radius", "legTipRadius": "Leg Tip Radius",
       "oneMonth": "1 Month", "oneYear": "1 Year",
       "resetAll": "Clear All", "exchangeRate": "Exchange Rate",
-      "selectMaterial": "Select material...", "selectProduct": "Select product type..."
+      "selectMaterial": "Select material...", "selectProduct": "Select product type...", "showAllMaterials": "Show all materials...",
+      "technicalDrawing": "Technical Drawing", "reset": "Reset"
     }
   }
 }
