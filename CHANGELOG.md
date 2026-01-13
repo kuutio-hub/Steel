@@ -2,6 +2,15 @@
 
 A projekt minden jelentős változása ebben a fájlban lesz dokumentálva.
 
+## [1.8.0] - 2024-08-01
+
+### Hozzáadva
+- **Egységes modális választó ablak:** A terméktípus, anyag és szabványméret választók lecserélve egyetlen, felugró ablakos megoldásra a jobb használhatóság és egységesebb megjelenés érdekében.
+- **Beépített kereső:** Minden választó ablak kapott egy keresőmezőt, ami megkönnyíti a hosszú listákban való navigációt.
+
+### Módosítva
+- **Felhasználói felület egyszerűsítése:** A korábbi, egyedi legördülő menük teljes mértékben eltávolításra kerültek.
+
 ## [1.7.0] - 2024-07-31
 
 ### Eltávolítva
@@ -62,4 +71,4 @@ A projekt minden jelentős változása ebben a fájlban lesz dokumentálva.
 - **Alapfunkciók:** Anyag- és terméktípus választás, méretek megadása.
 - **Számítások:** Keresztmetszet, méterenkénti és teljes tömeg, felület és ár számítása.
 - **Haladó funkciók:** Egyedi anyagok kezelése, kedvencek rendszere, HUF/EUR valutaváltó árfolyamgrafikonnal.
-- **UI:** Reszponzív, kétoszlopos elrendezés, sötét/világos téma, magyar és angol nyelvi támogatás.
+- **UI:** Responzív, kétoszlopos elrendezés, sötét/világos téma, magyar és angol nyelvi támogatás.

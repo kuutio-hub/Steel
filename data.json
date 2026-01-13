@@ -23,73 +23,63 @@
     "specialAlloys": ["Inconel 718", "Monel 400"],
     "plastics": ["POM (Delrin)", "PA6", "PA66", "PTFE (Teflon)", "PVC", "PE-HD"]
   },
-   "PRODUCT_MATERIAL_AVAILABILITY": {
-    "roundProfile": ["structuralSteels", "stainlessSteels", "toolSteels", "lightMetals", "nonFerrousMetals", "plastics"],
-    "squareProfile": ["structuralSteels", "stainlessSteels", "lightMetals", "nonFerrousMetals", "plastics"],
-    "flatProfile": ["structuralSteels", "stainlessSteels", "lightMetals", "nonFerrousMetals", "plastics"],
-    "pipe": ["structuralSteels", "stainlessSteels", "lightMetals", "nonFerrousMetals"],
-    "tube": ["structuralSteels", "stainlessSteels", "lightMetals"],
-    "iBeam": ["structuralSteels"],
-    "uChannel": ["structuralSteels"],
-    "angleProfile": ["structuralSteels", "stainlessSteels", "lightMetals"]
-  },
   "STANDARD_PROFILES": {
     "iBeam": {
       "IPE": {
-        "80": { "h": 80, "b": 46, "s": 3.8, "t": 5.2, "r1": 5 },
-        "100": { "h": 100, "b": 55, "s": 4.1, "t": 5.7, "r1": 7 },
-        "120": { "h": 120, "b": 64, "s": 4.4, "t": 6.3, "r1": 7 },
-        "140": { "h": 140, "b": 73, "s": 4.7, "t": 6.9, "r1": 7 },
-        "160": { "h": 160, "b": 82, "s": 5.0, "t": 7.4, "r1": 9 },
-        "180": { "h": 180, "b": 91, "s": 5.3, "t": 8.0, "r1": 9 },
-        "200": { "h": 200, "b": 100, "s": 5.6, "t": 8.5, "r1": 11 }
+        "80": { "h": 80, "b": 46, "s": 3.8, "t": 5.2, "r1": 5, "weight": 6.0 },
+        "100": { "h": 100, "b": 55, "s": 4.1, "t": 5.7, "r1": 7, "weight": 8.1 },
+        "120": { "h": 120, "b": 64, "s": 4.4, "t": 6.3, "r1": 7, "weight": 10.4 },
+        "140": { "h": 140, "b": 73, "s": 4.7, "t": 6.9, "r1": 7, "weight": 12.9 },
+        "160": { "h": 160, "b": 82, "s": 5.0, "t": 7.4, "r1": 9, "weight": 15.8 },
+        "180": { "h": 180, "b": 91, "s": 5.3, "t": 8.0, "r1": 9, "weight": 18.8 },
+        "200": { "h": 200, "b": 100, "s": 5.6, "t": 8.5, "r1": 11, "weight": 22.4 }
       },
       "HEB": {
-        "100": { "h": 100, "b": 100, "s": 6, "t": 10, "r1": 12 },
-        "120": { "h": 120, "b": 120, "s": 6.5, "t": 11, "r1": 12 },
-        "140": { "h": 140, "b": 140, "s": 7, "t": 12, "r1": 15 },
-        "160": { "h": 160, "b": 160, "s": 8, "t": 13, "r1": 15 },
-        "180": { "h": 180, "b": 180, "s": 8.5, "t": 14, "r1": 18 },
-        "200": { "h": 200, "b": 200, "s": 9, "t": 15, "r1": 18 }
+        "100": { "h": 100, "b": 100, "s": 6, "t": 10, "r1": 12, "weight": 20.4 },
+        "120": { "h": 120, "b": 120, "s": 6.5, "t": 11, "r1": 12, "weight": 26.7 },
+        "140": { "h": 140, "b": 140, "s": 7, "t": 12, "r1": 15, "weight": 33.7 },
+        "160": { "h": 160, "b": 160, "s": 8, "t": 13, "r1": 15, "weight": 42.6 },
+        "180": { "h": 180, "b": 180, "s": 8.5, "t": 14, "r1": 18, "weight": 51.2 },
+        "200": { "h": 200, "b": 200, "s": 9, "t": 15, "r1": 18, "weight": 61.3 }
       },
       "HEA": {
-        "100": { "h": 96, "b": 100, "s": 5, "t": 8, "r1": 12 },
-        "120": { "h": 114, "b": 120, "s": 5, "t": 8, "r1": 12 },
-        "140": { "h": 133, "b": 140, "s": 5.5, "t": 8.5, "r1": 15 },
-        "160": { "h": 152, "b": 160, "s": 6, "t": 9, "r1": 15 },
-        "180": { "h": 171, "b": 180, "s": 6, "t": 9.5, "r1": 18 },
-        "200": { "h": 190, "b": 200, "s": 6.5, "t": 10, "r1": 18 }
+        "100": { "h": 96, "b": 100, "s": 5, "t": 8, "r1": 12, "weight": 16.7 },
+        "120": { "h": 114, "b": 120, "s": 5, "t": 8, "r1": 12, "weight": 19.9 },
+        "140": { "h": 133, "b": 140, "s": 5.5, "t": 8.5, "r1": 15, "weight": 24.7 },
+        "160": { "h": 152, "b": 160, "s": 6, "t": 9, "r1": 15, "weight": 30.4 },
+        "180": { "h": 171, "b": 180, "s": 6, "t": 9.5, "r1": 18, "weight": 35.5 },
+        "200": { "h": 190, "b": 200, "s": 6.5, "t": 10, "r1": 18, "weight": 42.3 }
       }
     },
     "uChannel": {
       "UNP": {
-        "80": { "h": 80, "b": 45, "s": 6, "t": 8, "r1": 8, "r2": 4 },
-        "100": { "h": 100, "b": 50, "s": 6, "t": 8.5, "r1": 8.5, "r2": 4.5 },
-        "120": { "h": 120, "b": 55, "s": 7, "t": 9, "r1": 9, "r2": 4.5 },
-        "140": { "h": 140, "b": 60, "s": 7, "t": 10, "r1": 10, "r2": 5 },
-        "160": { "h": 160, "b": 65, "s": 7.5, "t": 10.5, "r1": 10.5, "r2": 5.5 },
-        "180": { "h": 180, "b": 70, "s": 8, "t": 11, "r1": 11, "r2": 5.5 },
-        "200": { "h": 200, "b": 75, "s": 8.5, "t": 11.5, "r1": 11.5, "r2": 6 }
+        "80": { "h": 80, "b": 45, "s": 6, "t": 8, "r1": 8, "r2": 4, "weight": 8.64 },
+        "100": { "h": 100, "b": 50, "s": 6, "t": 8.5, "r1": 8.5, "r2": 4.5, "weight": 10.6 },
+        "120": { "h": 120, "b": 55, "s": 7, "t": 9, "r1": 9, "r2": 4.5, "weight": 13.4 },
+        "140": { "h": 140, "b": 60, "s": 7, "t": 10, "r1": 10, "r2": 5, "weight": 16.0 },
+        "160": { "h": 160, "b": 65, "s": 7.5, "t": 10.5, "r1": 10.5, "r2": 5.5, "weight": 18.8 },
+        "180": { "h": 180, "b": 70, "s": 8, "t": 11, "r1": 11, "r2": 5.5, "weight": 22.0 },
+        "200": { "h": 200, "b": 75, "s": 8.5, "t": 11.5, "r1": 11.5, "r2": 6, "weight": 25.3 }
       }
     },
     "angleProfile": {
       "equalLegAngle": {
-        "20x3": { "a": 20, "b": 20, "v": 3, "r1": 3.5, "r2": 1.8 },
-        "25x3": { "a": 25, "b": 25, "v": 3, "r1": 3.5, "r2": 1.8 },
-        "30x3": { "a": 30, "b": 30, "v": 3, "r1": 5, "r2": 2.5 },
-        "40x4": { "a": 40, "b": 40, "v": 4, "r1": 6, "r2": 3 },
-        "50x5": { "a": 50, "b": 50, "v": 5, "r1": 7, "r2": 3.5 },
-        "60x6": { "a": 60, "b": 60, "v": 6, "r1": 8, "r2": 4 },
-        "80x8": { "a": 80, "b": 80, "v": 8, "r1": 10, "r2": 5 },
-        "100x10": { "a": 100, "b": 100, "v": 10, "r1": 12, "r2": 6 }
+        "20x3": { "a": 20, "b": 20, "v": 3, "r1": 3.5, "r2": 1.8, "weight": 0.889 },
+        "25x3": { "a": 25, "b": 25, "v": 3, "r1": 3.5, "r2": 1.8, "weight": 1.12 },
+        "30x3": { "a": 30, "b": 30, "v": 3, "r1": 5, "r2": 2.5, "weight": 1.36 },
+        "40x4": { "a": 40, "b": 40, "v": 4, "r1": 6, "r2": 3, "weight": 2.42 },
+        "50x5": { "a": 50, "b": 50, "v": 5, "r1": 7, "r2": 3.5, "weight": 3.77 },
+        "60x6": { "a": 60, "b": 60, "v": 6, "r1": 8, "r2": 4, "weight": 5.42 },
+        "80x8": { "a": 80, "b": 80, "v": 8, "r1": 10, "r2": 5, "weight": 9.63 },
+        "100x10": { "a": 100, "b": 100, "v": 10, "r1": 12, "r2": 6, "weight": 15.0 }
       },
       "unequalLegAngle": {
-        "30x20x3": { "a": 30, "b": 20, "v": 3, "r1": 5, "r2": 2.5 },
-        "40x20x4": { "a": 40, "b": 20, "v": 4, "r1": 6, "r2": 3 },
-        "50x30x5": { "a": 50, "b": 30, "v": 5, "r1": 7, "r2": 3.5 },
-        "60x40x6": { "a": 60, "b": 40, "v": 6, "r1": 8, "r2": 4 },
-        "80x60x8": { "a": 80, "b": 60, "v": 8, "r1": 10, "r2": 5 },
-        "100x50x8": { "a": 100, "b": 50, "v": 8, "r1": 12, "r2": 6 }
+        "30x20x3": { "a": 30, "b": 20, "v": 3, "r1": 5, "r2": 2.5, "weight": 1.12 },
+        "40x20x4": { "a": 40, "b": 20, "v": 4, "r1": 6, "r2": 3, "weight": 1.81 },
+        "50x30x5": { "a": 50, "b": 30, "v": 5, "r1": 7, "r2": 3.5, "weight": 3.05 },
+        "60x40x6": { "a": 60, "b": 40, "v": 6, "r1": 8, "r2": 4, "weight": 4.47 },
+        "80x60x8": { "a": 80, "b": 60, "v": 8, "r1": 10, "r2": 5, "weight": 8.23 },
+        "100x50x8": { "a": 100, "b": 50, "v": 8, "r1": 12, "r2": 6, "weight": 8.98 }
       }
     }
   },
@@ -122,7 +112,9 @@
       "oneMonth": "1 Hónap", "oneYear": "1 Év",
       "resetAll": "Mindent töröl", "exchangeRate": "Árfolyam",
       "selectMaterial": "Válassz anyagot...", "selectProduct": "Válassz terméket...", "showAllMaterials": "Minden anyag mutatása...",
-      "technicalDrawing": "Műszaki rajz", "reset": "Visszaállítás"
+      "technicalDrawing": "Műszaki rajz", "reset": "Visszaállítás",
+      "tableWeightTooltip": "Szabványos táblázat szerinti tömeg. A méretek kézi módosítása geometriai számításra vált.",
+      "search": "Keresés..."
     },
     "en": {
       "title": "Metal Calculator", "inputParameters": "Input Parameters", "material": "Material", "productType": "Product Type", "results": "Calculation Results",
@@ -142,7 +134,9 @@
       "oneMonth": "1 Month", "oneYear": "1 Year",
       "resetAll": "Clear All", "exchangeRate": "Exchange Rate",
       "selectMaterial": "Select material...", "selectProduct": "Select product type...", "showAllMaterials": "Show all materials...",
-      "technicalDrawing": "Technical Drawing", "reset": "Reset"
+      "technicalDrawing": "Technical Drawing", "reset": "Reset",
+      "tableWeightTooltip": "Standard table weight. Manual dimension changes will switch to geometric calculation.",
+      "search": "Search..."
     }
   }
 }
