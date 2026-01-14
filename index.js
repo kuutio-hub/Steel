@@ -1,4 +1,5 @@
 
+
 import { calculateCrossSection, calculateSurfaceAreaPerMeter } from './calculator.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -51,10 +52,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (saved) {
                 try {
                     const loadedState = JSON.parse(saved);
-                    if (!loadedState.pipeDimUnits) {
-                        loadedState.pipeDimUnits = { outerDiameter: 'mm', wallThickness: 'mm' };
-                    }
-                    Object.assign(state, loadedState);
+                    // Selectively apply saved state, keeping calculation-related state null
+                    const persistentState = {
+                        lang: loadedState.lang || 'hu',
+                        theme: loadedState.theme || 'dark',
+                        eurHufRate: loadedState.eurHufRate || 400.0,
+                        eurHufRateDate: loadedState.eurHufRateDate || null,
+                        customMaterials: loadedState.customMaterials || {},
+                        favorites: loadedState.favorites || [],
+                        productFavorites: loadedState.productFavorites || [],
+                        pipeDimUnits: loadedState.pipeDimUnits || { outerDiameter: 'mm', wallThickness: 'mm' }
+                    };
+                    Object.assign(state, persistentState);
+
                 } catch (e) {
                     console.error("Could not load state, starting fresh.", e);
                     localStorage.removeItem('steelCalcState');
@@ -65,6 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     async function fetchAppData() {
         try {
+            // Using a relative path which is more robust across different environments.
             const response = await fetch('./data.json', { cache: 'no-store' });
             if (!response.ok) throw new Error('Network response not ok');
             APP_DATA = await response.json();
@@ -237,7 +248,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const createOption = (key) => {
             const li = document.createElement('li');
             li.className = 'option';
-            if (key === state.selectedMaterial) li.classList.add('selected');
             li.dataset.value = key;
             li.textContent = key;
             return li;
@@ -286,22 +296,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         const createOption = (key) => {
             const li = document.createElement('li');
             li.className = 'option';
-            if (key === state.selectedProduct) li.classList.add('selected');
             li.dataset.value = key;
             li.textContent = LANG[state.lang][key] || key;
             return li;
         };
         
-        const createGroup = (labelKey, keys) => {
+        const createGroup = (labelKey, keys, isExpanded = false) => {
             if (!keys || keys.length === 0) return;
             const groupLi = document.createElement('li');
             const header = document.createElement('div');
             header.className = 'group-header';
+            header.dataset.expandedDefault = isExpanded;
+            if (!isExpanded) header.classList.add('collapsed');
             header.textContent = LANG[state.lang][labelKey] || labelKey;
             
             const optionList = document.createElement('ul');
             optionList.className = 'option-list';
-            keys.forEach(key => optionList.appendChild(createOption(key)));
+            if (!isExpanded) optionList.classList.add('collapsed');
+            
+            keys.sort((a,b) => (LANG[state.lang][a] || a).localeCompare(LANG[state.lang][b] || b))
+                .forEach(key => optionList.appendChild(createOption(key)));
             
             if (optionList.childElementCount > 0) {
                 groupLi.appendChild(header);
@@ -310,9 +324,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
         
-        createGroup('favorites', state.productFavorites);
-        createGroup('productType', Object.keys(PRODUCT_TYPES).filter(p => !specialProfiles.includes(p) && !state.productFavorites.includes(p)));
-        createGroup('specialProfiles', specialProfiles.filter(p => !state.productFavorites.includes(p)));
+        createGroup('favorites', state.productFavorites, true);
+        createGroup('productType', Object.keys(PRODUCT_TYPES).filter(p => !specialProfiles.includes(p) && !state.productFavorites.includes(p)), false);
+        createGroup('specialProfiles', specialProfiles.filter(p => !state.productFavorites.includes(p)), false);
         return listRoot;
     }
 
@@ -326,7 +340,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const createOption = (key, value) => {
             const li = document.createElement('li');
             li.className = 'option';
-            if (value === state.selectedStandardSize) li.classList.add('selected');
             li.dataset.value = value;
             li.textContent = key;
             return li;
@@ -373,7 +386,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     function selectMaterial(materialName) {
         if (!materialName) return;
-        resetDimensionInputs();
         state.selectedMaterial = materialName;
         updateMaterialDisplay();
         calculate();
@@ -391,10 +403,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     function selectProductType(productType) {
-        if (!productType) return;
+        if (productType === state.selectedProduct) return;
         state.selectedProduct = productType;
+        state.selectedMaterial = null; // Anyagot is töröljük, ha új termék van
         resetDimensionInputs();
-        state.selectedMaterial = null;
         updateMaterialDisplay();
         updateProductTypeDisplay();
         updateDimensionFields(); 
@@ -654,10 +666,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function resetAllInputs() {
+        state.selectedProduct = null;
+        state.selectedMaterial = null;
+
+        updateProductTypeDisplay();
+        updateMaterialDisplay();
+
         resetDimensionInputs();
+        
         DOMElements.pricePerKg.value = '';
         DOMElements.pricePerMeter.value = '';
         state.priceHufKg = 0;
+        
+        updateDimensionFields();
         storage.saveState();
         calculate();
     }
@@ -705,7 +726,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="material-actions">
                     ${isCustom ? `
                     <button class="edit-material-btn" data-name="${name}" title="${LANG[lang].edit}"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                    <button class="delete-material-btn" data-name="${name}" title="${LANG[lang].delete}"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                    <button class="delete-material-btn" data-name="${name}" title="${LANG[lang].delete}"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1 -2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                     ` : ''}
                 </div>`;
             DOMElements.allMaterialsList.appendChild(li);
@@ -850,6 +871,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         DOMElements.lengthInput.addEventListener('input', calculate);
+
+        // Price input listeners for real-time calculation
+        DOMElements.pricePerKg.addEventListener('input', updatePrices);
+        DOMElements.pricePerMeter.addEventListener('input', updatePrices);
+
         DOMElements.eurHufRate.addEventListener('input', (e) => {
             state.eurHufRate = parseFloat(e.target.value) || 0;
             state.eurHufRateDate = 'manual';
@@ -858,10 +884,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             updatePrices();
         });
         DOMElements.exchangeRateResetBtn.addEventListener('click', fetchExchangeRate);
-        [DOMElements.pricePerKg, DOMElements.pricePerMeter].forEach(el => el.addEventListener('input', (e) => updatePrices(e)));
         [DOMElements.priceUnitToggleKg, DOMElements.priceUnitToggleM, DOMElements.totalPriceUnitToggle].forEach(el => el.addEventListener('click', () => {
             state.priceCurrency = state.priceCurrency === 'HUF' ? 'EUR' : 'HUF';
-            storage.saveState(); updatePrices();
+            
+            if (state.priceCurrency === 'EUR') {
+                const body = document.getElementById('exchange-rate-body');
+                const icon = document.querySelector('#exchange-rate-header .collapse-icon');
+                if (body.classList.contains('collapsed')) {
+                    body.classList.remove('collapsed');
+                    icon.classList.remove('collapsed');
+                }
+            }
+
+            storage.saveState();
+            updatePrices();
         }));
 
         DOMElements.manageMaterialsBtn.addEventListener('click', () => { renderAllMaterialsList(); openModal(DOMElements.materialsModal); });
@@ -883,8 +919,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (confirm(`Biztosan törli a(z) "${name}" anyagot?`)) {
                     delete state.customMaterials[name];
                     state.favorites = state.favorites.filter(fav => fav !== name);
-                    if (state.selectedMaterial === name) { state.selectedMaterial = null; resetAllInputs(); }
-                    storage.saveState(); renderAllMaterialsList(); updateMaterialDisplay();
+                    if (state.selectedMaterial === name) {
+                         state.selectedMaterial = null;
+                         updateMaterialDisplay();
+                    }
+                    storage.saveState(); renderAllMaterialsList();
                 }
             }
         });
@@ -892,7 +931,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Alkalmazás Indítása ---
     async function init() {
-        storage.loadState();
+        storage.loadState(); // Loads persistent settings
+        
+        // Ensure calculation state is fresh on every load
+        state.selectedMaterial = null;
+        state.selectedProduct = null;
+        state.selectedStandardSize = null;
+        state.priceHufKg = 0;
+        state.priceCurrency = 'HUF';
+        state.crossSectionUnit = 'mm2';
+        state.lengthUnit = 'mm';
+
         if (!await fetchAppData()) return;
         
         const { LANG } = APP_DATA;
@@ -911,12 +960,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateExchangeRateDateDisplay();
         DOMElements.copyrightYear.textContent = new Date().getFullYear().toString();
         
-        resetDimensionInputs();
-        if(!state.selectedProduct) updateDimensionFields();
-        fetchExchangeRate();
+        resetAllInputs(); // This will clear displays and fields
+
+        if (state.eurHufRateDate !== 'manual') {
+            fetchExchangeRate();
+        }
+        
         initResizer();
         setupEventListeners();
-        calculate();
     }
 
     init();
