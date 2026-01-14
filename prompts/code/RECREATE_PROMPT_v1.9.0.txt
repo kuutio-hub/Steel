@@ -1,0 +1,35 @@
+Készíts egy teljes, responzív, modern, ipari jellegű, magyar nyelvű webalkalkalmazást „Metal Calculator” néven. A webappnak GitHub Pagesen azonnal futnia kell.
+
+A projekt legyen egyetlen `index.html` fájl, amely tartalmazza a HTML-t, a CSS-t `<style>` tagekben, és a JavaScriptet `<script>` tagekben. A projektnek CDN-ről kell betöltenie a `Chart.js` könyvtárat. Minden belső hivatkozás legyen relatív. Az alkalmazásnak offline is működnie kell, kivéve az API hívásokat.
+
+**1. Vizuális megjelenés és elrendezés:**
+-   **Dizájnrendszer:** Az alkalmazásnak szigorúan követnie kell a `prompts/design/visual_identity_v3.txt` fájlban meghatározott vizuális irányelveket.
+-   **Felületi tagolás:** A bemeneti és eredmény panelen a logikailag összetartozó csoportokat (pl. Anyagválasztás, Árszámítás) vizuális elválasztóvonalakkal (`border-top`) kell szeparálni.
+
+**2. Adatbázisok (Belső konstansok):**
+-   **Anyag-, profil- és nyelvi adatok:** A JavaScript tartalmazzon belső konstansokat a sűrűségek (`MATERIAL_DENSITIES`), anyagcsoportok (`MATERIAL_GROUPS`), szabványméretek (`STANDARD_PROFILES`) és nyelvi fordítások (`LANG`) számára.
+
+**3. Bemeneti Paraméterek Panel:**
+-   **Választó felületek:** Az anyag-, terméktípus- és szabványméret-választóknak egy egységes, modális (felugró) ablakos rendszeren keresztül kell működniük.
+    -   Minden modális ablak tartalmazzon egy keresőmezőt a lista gyors szűréséhez.
+    -   A listák legyenek csoportosítva. **Kritikus követelmény:** Az anyagválasztó ablakban a csoportok legyenek összecsukhatók a jobb átláthatóság érdekében. A "Kedvencek" és "Saját anyagok" alapból legyenek nyitva.
+-   **Kedvencek:** A felhasználónak lehetősége legyen kedvencként megjelölni anyagokat és terméktípusokat.
+-   **Szabványméret választó:** Csak szabványosított szelvényeknél jelenjen meg, és kiválasztásakor automatikusan töltse ki a méretmezőket.
+-   **Méretmezők:** Dinamikusan generálódjanak a kiválasztott terméktípus alapján.
+
+**4. Eredmények Panel:**
+-   **Számítási logika:** A program számolja ki a keresztmetszetet, a méterenkénti tömeget, és a méterenkénti külső felületet.
+-   **Szekciók aktiválása:** Az eredmény szekciók és a "Hossz" mező csak akkor váljanak aktívvá, ha a számításhoz szükséges adatok rendelkezésre állnak.
+-   **Árszámítás:**
+    -   Kétirányú, valós idejű szinkronizáció az `Ár / kg` és `Ár / méter` mezők között.
+    -   A nullával való osztást meg kell előzni.
+    -   **Valutakezelés:** HUF/EUR konverzió, napi árfolyam lekérése API-ról, és historikus árfolyamdiagram modális ablakban.
+-   **Hossz mértékegység:** A "Hossz" mező mellett legyen egy mértékegység-váltó (`mm`/`m`), ami az értéket is átváltja.
+
+**5. Haladó Funkciók és Modális Ablakok:**
+-   **Anyagkezelő:** Modális ablak új anyagok hozzáadására, meglévők szerkesztésére és törlésére.
+-   **Grafikonok:** Az EUR/HUF árfolyamgrafikonnak esztétikusan, a dizájnrendszerhez illeszkedő színekkel kell megjelennie.
+-   **localStorage mentés:** Minden felhasználói beállítás (nyelv, téma, kedvencek, egyéni anyagok, árak, mértékegységek) mentésre kerüljön.
+
+**6. Dokumentáció:**
+-   **README.md & CHANGELOG.md:** A projekt tartalmazzon egy `README.md` fájlt a projekt leírásával és használati útmutatójával, valamint egy `CHANGELOG.md` fájlt a verziók változásainak követésére.

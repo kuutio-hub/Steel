@@ -16,7 +16,7 @@ A Metal Calculator egy böngészőben futó, professzionális eszköz, amelyet m
 -   **Egyedi anyagok:** Lehetőség van saját anyagok hozzáadására, szerkesztésére és törlésére, amelyeket a böngésző elment.
 -   **Sokoldalú formaválaszték:** Számítások elvégzése kör-, négyzet-, laposacélra, csövekre, zártszelvényekre és szabványos I- és U-szelvényekre.
 -   **Kétirányú árszinkronizáció:** Az ár megadható `Ft/kg` vagy `Ft/m` alapon is – a program a másik értéket automatikusan, gépelés közben számolja.
--   **Valutakezelés:** Beépített HUF/EUR konverzió napi frissítésű árfolyammal és historikus árfolyamgrafikonnal.
+-   **Valutakezelés:** Beépített HUF/EUR konverzió napi frissítésű árfolyammal.
 -   **Kedvencek rendszer:** A leggyakrabban használt anyagok és terméktípusok a lista elejére rögzíthetők a gyorsabb elérés érdekében.
 -   **Modern felület:** Világos és sötét téma, reszponzív, kétoszlopos elrendezés, amelyet a felhasználó átméretezhet.
 -   **Lokalizáció:** Az alkalmazás felülete magyar és angol nyelven is elérhető.
@@ -37,7 +37,7 @@ A Metal Calculator egy böngészőben futó, professzionális eszköz, amelyet m
     *   Az **Árszámítás** szekcióban adja meg az anyag ismert árát.
     *   Ha az egységárat tudja (`Ft/kg`), írja be az "Ár / kg" mezőbe. A program azonnal kiszámolja a folyóméterárat az "Ár / méter" mezőbe.
     *   Ha a folyóméterárat tudja (`Ft/m`), írja be az "Ár / méter" mezőbe, és a program visszaszámolja az egységárat.
-    *   A `HUF`/`EUR` gombokkal válthat a valuták között.
+    *   A `HUF`/`EUR` gombokkal válthat a valuták között. Az árfolyam mellett zárójelben látható a frissítés dátuma.
 
 4.  **Eredmények leolvasása:**
     *   A méretek megadása után a "Méterenkénti értékek" szekció aktívvá válik, és mutatja a keresztmetszetet, a tömeget (kg/m) és a felületet (m²/m).
@@ -61,7 +61,7 @@ Metal Calculator is a professional, in-browser tool designed for engineers, proc
 -   **Custom Materials:** Ability to add, edit, and delete your own materials, which are saved in the browser.
 -   **Versatile Shape Selection:** Perform calculations for round bars, square bars, flat bars, pipes, tubes, and standard I- and U-profiles.
 -   **Two-Way Price Synchronization:** The price can be entered based on `Price/kg` or `Price/m` – the program automatically calculates the other value in real-time as you type.
--   **Currency Management:** Built-in HUF/EUR conversion with a daily updated exchange rate and a historical rate chart.
+-   **Currency Management:** Built-in HUF/EUR conversion with a daily updated exchange rate.
 -   **Favorites System:** Pin your most frequently used materials and product types to the top of the list for faster access.
 -   **Modern Interface:** Light and dark themes, with a responsive, user-resizable two-column layout.
 -   **Localization:** The application interface is available in both Hungarian and English.
@@ -82,7 +82,7 @@ Metal Calculator is a professional, in-browser tool designed for engineers, proc
     *   In the **Price Calculation** section, enter the known price of the material.
     *   If you know the unit price (`EUR/kg`), type it into the "Price / kg" field. The program will instantly calculate the price per meter in the "Price / meter" field.
     *   If you know the price per meter (`EUR/m`), type it into the "Price / meter" field, and the program will calculate the unit price.
-    *   Use the `HUF`/`EUR` buttons to switch between currencies.
+    *   Use the `HUF`/`EUR` buttons to switch between currencies. The date of the exchange rate is shown in parentheses.
 
 4.  **View Results:**
     *   After entering the dimensions, the "Values Per Meter" section becomes active, showing the cross-section, weight (kg/m), and surface area (m²/m).

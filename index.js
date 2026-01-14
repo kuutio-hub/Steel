@@ -5,16 +5,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // --- Globális változók és állapot ---
     let APP_DATA = {};
-    let HISTORICAL_RATES = {};
-    const APP_VERSION = '1.8.0';
+    const APP_VERSION = '2.1.0';
 
     let state = {
-        lang: 'hu', theme: 'dark', eurHufRate: 400.0, priceCurrency: 'HUF',
+        lang: 'hu', theme: 'dark', eurHufRate: 400.0, eurHufRateDate: null, priceCurrency: 'HUF',
         customMaterials: {}, favorites: [], productFavorites: [],
         crossSectionUnit: 'mm2', lengthUnit: 'mm', selectedMaterial: null, selectedProduct: null, selectedStandardSize: null,
         priceHufKg: 0,
         pipeDimUnits: { outerDiameter: 'mm', wallThickness: 'mm' },
-        charts: { current: null },
     };
 
     // --- DOM Elemek Gyűjtése ---
@@ -25,13 +23,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         'standard-size-container', 'standard-size-select-custom', 'dimension-fields', 'length-input', 'length-unit-toggle',
         'per-meter-results-section', 'results-total-wrapper', 'result-cross-section', 'cross-section-unit-toggle', 'result-weight-meter', 'result-surface-area', 
         'result-total-weight', 'result-total-surface', 'result-total-price', 'total-price-unit-toggle', 
-        'eur-huf-rate', 'exchange-rate-chart-btn', 'exchange-rate-reset-btn', 'price-per-kg', 'price-per-meter', 'price-unit-toggle-kg', 
+        'eur-huf-rate', 'exchange-rate-reset-btn', 'exchange-rate-date', 'price-per-kg', 'price-per-meter', 'price-unit-toggle-kg', 
         'price-unit-toggle-m', 'manage-materials-btn', 'materials-modal', 
-        'chart-popup-overlay', 'chart-popup-content', 'chart-popup-title', 'chart-popup-body',
-        'chart-start-date', 'chart-end-date', 'chart-range-1m', 'chart-range-1y',
         'new-material-name', 'new-material-density', 'add-material-btn', 'all-materials-list', 
         'editing-material-name', 'copyright-year', 'app-version',
-        'selection-modal'
+        'selection-modal', 'input-card-body'
     ];
     domIds.forEach(id => {
         const camelCaseId = id.replace(/-(\w)/g, (_, c) => c.toUpperCase());
@@ -48,7 +44,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const storage = {
         saveState: () => {
             const stateToSave = { ...state };
-            delete stateToSave.charts;
             localStorage.setItem('steelCalcState', JSON.stringify(stateToSave));
         },
         loadState: () => {
@@ -59,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (!loadedState.pipeDimUnits) {
                         loadedState.pipeDimUnits = { outerDiameter: 'mm', wallThickness: 'mm' };
                     }
-                    Object.assign(state, loadedState, { charts: { current: null } });
+                    Object.assign(state, loadedState);
                 } catch (e) {
                     console.error("Could not load state, starting fresh.", e);
                     localStorage.removeItem('steelCalcState');
@@ -70,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     async function fetchAppData() {
         try {
-            const response = await fetch('./data.json');
+            const response = await fetch('./data.json', { cache: 'no-store' });
             if (!response.ok) throw new Error('Network response not ok');
             APP_DATA = await response.json();
             return true;
@@ -81,16 +76,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function fetchHistoricalRates() {
-        try {
-            const response = await fetch('./exchange_rates.json');
-            if (!response.ok) throw new Error('Network response not ok');
-            HISTORICAL_RATES = await response.json();
-        } catch(error) {
-            console.error("Failed to load historical exchange rates.", error);
-        }
-    }
-
     async function fetchExchangeRate() {
         try {
             const response = await fetch('https://api.frankfurter.app/latest?from=EUR&to=HUF');
@@ -98,7 +83,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
             if (data.rates && data.rates.HUF) {
                 state.eurHufRate = data.rates.HUF;
+                state.eurHufRateDate = data.date;
                 DOMElements.eurHufRate.value = state.eurHufRate.toFixed(2);
+                updateExchangeRateDateDisplay();
                 storage.saveState();
                 calculate();
             }
@@ -110,10 +97,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- UI Kezelés (Modals, Theme, Language) ---
     function openModal(modal) { modal.classList.add('active'); }
     function closeModal(modal) {
-        if(state.charts.current && modal.id === 'chart-popup-overlay') {
-            state.charts.current.destroy();
-            state.charts.current = null;
-        }
         modal.classList.remove('active'); 
     }
 
@@ -140,6 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateMaterialDisplay();
         updateStandardSizeDisplay();
         updateDimensionFields();
+        updateExchangeRateDateDisplay();
         storage.saveState();
     }
 
@@ -150,7 +134,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         DOMElements.themeIconMoon.style.display = theme === 'dark' ? 'block' : 'none';
         storage.saveState();
     }
-            
+    
+    function updateExchangeRateDateDisplay() {
+        if (!DOMElements.exchangeRateDate) return;
+        if (state.eurHufRateDate === 'manual') {
+            DOMElements.exchangeRateDate.textContent = `(${APP_DATA.LANG[state.lang].manualEntry})`;
+        } else if (state.eurHufRateDate) {
+            DOMElements.exchangeRateDate.textContent = `(${state.eurHufRateDate})`;
+        } else {
+            DOMElements.exchangeRateDate.textContent = '';
+        }
+    }
+
     // --- Új Modális Választó Rendszer ---
     function openSelectionModal(type) {
         const { LANG } = APP_DATA;
@@ -202,20 +197,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     function handleModalSearch(e) {
         const searchTerm = e.target.value.toLowerCase().trim();
         const modal = DOMElements.selectionModal;
-        const options = modal.querySelectorAll('.option');
-        const groups = modal.querySelectorAll('.group-header');
+        const groups = modal.querySelectorAll('li > .group-header');
 
-        options.forEach(option => {
-            const text = option.textContent.toLowerCase();
-            const match = text.includes(searchTerm);
-            option.style.display = match ? '' : 'none';
-        });
-
-        groups.forEach(group => {
-            const list = group.nextElementSibling;
+        groups.forEach(header => {
+            const list = header.nextElementSibling;
+            let hasVisibleChild = false;
             if (list && list.classList.contains('option-list')) {
-                const visibleOptions = Array.from(list.querySelectorAll('.option')).some(opt => opt.style.display !== 'none');
-                group.style.display = visibleOptions ? '' : 'none';
+                const options = list.querySelectorAll('.option');
+                options.forEach(option => {
+                    const text = option.textContent.toLowerCase();
+                    const match = text.includes(searchTerm);
+                    option.style.display = match ? '' : 'none';
+                    if (match) hasVisibleChild = true;
+                });
+            }
+            
+            const groupLi = header.parentElement;
+            groupLi.style.display = hasVisibleChild ? '' : 'none';
+
+            if (searchTerm) {
+                if (hasVisibleChild) {
+                    header.classList.remove('collapsed');
+                    list.classList.remove('collapsed');
+                }
+            } else { // search is empty, restore default
+                const isExpandedDefault = header.dataset.expandedDefault === 'true';
+                header.classList.toggle('collapsed', !isExpandedDefault);
+                list.classList.toggle('collapsed', !isExpandedDefault);
             }
         });
     }
@@ -235,15 +243,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             return li;
         };
 
-        const createGroup = (labelKey, keys) => {
+        const createGroup = (labelKey, keys, isExpanded = false) => {
             if (!keys || keys.length === 0) return;
             const groupLi = document.createElement('li');
             const header = document.createElement('div');
             header.className = 'group-header';
+            header.dataset.expandedDefault = isExpanded;
+            if (!isExpanded) header.classList.add('collapsed');
             header.textContent = LANG[state.lang][labelKey] || labelKey;
             
             const optionList = document.createElement('ul');
             optionList.className = 'option-list';
+            if (!isExpanded) optionList.classList.add('collapsed');
             
             keys.sort((a,b) => a.localeCompare(b)).forEach(key => {
                 if (allMaterials[key]) optionList.appendChild(createOption(key));
@@ -256,12 +267,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
         
-        createGroup('favorites', state.favorites);
+        createGroup('favorites', state.favorites, true);
         const customKeys = Object.keys(state.customMaterials).filter(k => !state.favorites.includes(k));
-        createGroup('customMaterials', customKeys);
+        createGroup('customMaterials', customKeys, true);
+
         Object.keys(MATERIAL_GROUPS).forEach(groupKey => {
             const members = MATERIAL_GROUPS[groupKey].filter(k => !state.favorites.includes(k) && !customKeys.includes(k) && MATERIAL_DENSITIES[k]);
-            if(members.length > 0) createGroup(groupKey, members);
+            if(members.length > 0) createGroup(groupKey, members, false);
         });
         return listRoot;
     }
@@ -700,68 +712,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- Grafikon Kezelés ---
-    function openChartPopup(title, contentGenerator) {
-        DOMElements.chartPopupTitle.innerText = title;
-        DOMElements.chartPopupBody.innerHTML = '';
-        contentGenerator(DOMElements.chartPopupBody);
-        openModal(DOMElements.chartPopupOverlay);
-    }
-
-    function updateChartData(startDate, endDate) {
-        const chart = state.charts.current;
-        if (!chart) return;
-    
-        const formatDate = (date) => date.toISOString().split('T')[0];
-        const startStr = formatDate(startDate);
-        const endStr = formatDate(endDate);
-    
-        const filteredLabels = Object.keys(HISTORICAL_RATES)
-            .filter(date => date >= startStr && date <= endStr)
-            .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-        
-        const filteredData = filteredLabels.map(date => HISTORICAL_RATES[date]);
-    
-        chart.data.labels = filteredLabels;
-        chart.data.datasets[0].data = filteredData;
-        chart.update();
-    }
-            
-    function showExchangeRateChart(container) {
-        const canvas = document.createElement('canvas');
-        container.appendChild(canvas);
-        if (state.charts.current) state.charts.current.destroy();
-
-        const formatDate = (date) => date.toISOString().split('T')[0];
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setMonth(endDate.getMonth() - 1);
-
-        DOMElements.chartStartDate.value = formatDate(startDate);
-        DOMElements.chartEndDate.value = formatDate(endDate);
-        
-        const initialLabels = Object.keys(HISTORICAL_RATES)
-            .filter(date => date >= formatDate(startDate) && date <= formatDate(endDate))
-            .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-        const initialData = initialLabels.map(date => HISTORICAL_RATES[date]);
-        
-        const ctx = canvas.getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, `color-mix(in srgb, ${getComputedStyle(document.documentElement).getPropertyValue('--bg-accent').trim()} 40%, transparent)`);
-        gradient.addColorStop(1, `color-mix(in srgb, ${getComputedStyle(document.documentElement).getPropertyValue('--bg-accent').trim()} 0%, transparent)`);
-
-        state.charts.current = new Chart(ctx, {
-            type: 'line', data: { labels: initialLabels, datasets: [{ label: 'EUR/HUF', data: initialData, borderColor: 'var(--bg-accent)', backgroundColor: gradient, tension: 0.2, fill: true, pointRadius: 0, pointHoverRadius: 4, borderWidth: 1.5 }] },
-            options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: 'var(--border-color)' } } } }
-        });
-    }
-
     // --- Layout Kezelés ---
     function initResizer() {
         const resizer = DOMElements.resizer;
         const main = DOMElements.mainContainer;
         resizer.addEventListener('mousedown', function(e) {
             e.preventDefault();
+            resizer.classList.add('resizing');
             document.body.style.cursor = 'col-resize'; document.body.style.userSelect = 'none';
             const mouseMoveHandler = (e) => {
                 const containerRect = main.getBoundingClientRect(); const minWidth = 350;
@@ -772,6 +729,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 main.style.gridTemplateColumns = `${newLeftWidth}px 10px 1fr`;
             };
             const mouseUpHandler = () => {
+                resizer.classList.remove('resizing');
                 document.body.style.cursor = ''; document.body.style.userSelect = '';
                 window.removeEventListener('mousemove', mouseMoveHandler);
                 window.removeEventListener('mouseup', mouseUpHandler);
@@ -826,6 +784,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 closeModal(DOMElements.selectionModal);
                 return;
             }
+
+            const header = e.target.closest('.group-header');
+            if (header) {
+                header.classList.toggle('collapsed');
+                const list = header.nextElementSibling;
+                if (list && list.classList.contains('option-list')) {
+                    list.classList.toggle('collapsed');
+                }
+                return;
+            }
+
             const option = e.target.closest('.option');
             if (option) {
                 const type = DOMElements.selectionModal.dataset.type;
@@ -883,7 +852,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         DOMElements.lengthInput.addEventListener('input', calculate);
         DOMElements.eurHufRate.addEventListener('input', (e) => {
             state.eurHufRate = parseFloat(e.target.value) || 0;
-            storage.saveState(); updatePrices();
+            state.eurHufRateDate = 'manual';
+            updateExchangeRateDateDisplay();
+            storage.saveState();
+            updatePrices();
         });
         DOMElements.exchangeRateResetBtn.addEventListener('click', fetchExchangeRate);
         [DOMElements.pricePerKg, DOMElements.pricePerMeter].forEach(el => el.addEventListener('input', (e) => updatePrices(e)));
@@ -895,6 +867,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         DOMElements.manageMaterialsBtn.addEventListener('click', () => { renderAllMaterialsList(); openModal(DOMElements.materialsModal); });
         DOMElements.addMaterialBtn.addEventListener('click', handleAddOrUpdateMaterial);
         DOMElements.materialsModal.querySelector('.modal-close-btn').addEventListener('click', () => closeModal(DOMElements.materialsModal));
+
 
         DOMElements.allMaterialsList.addEventListener('click', (e) => {
             const { LANG } = APP_DATA; const target = e.target.closest('button'); if (!target) return;
@@ -915,35 +888,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
         });
-        
-        DOMElements.exchangeRateChartBtn.addEventListener('click', () => openChartPopup(APP_DATA.LANG[state.lang].exchangeRateChart, showExchangeRateChart));
-        const chartDateChangeHandler = () => {
-            const startDate = new Date(DOMElements.chartStartDate.value);
-            const endDate = new Date(DOMElements.chartEndDate.value);
-            if (startDate && endDate && startDate <= endDate) updateChartData(startDate, endDate);
-        };
-        DOMElements.chartStartDate.addEventListener('change', chartDateChangeHandler);
-        DOMElements.chartEndDate.addEventListener('change', chartDateChangeHandler);
-        DOMElements.chartRange1m.addEventListener('click', () => {
-            const endDate = new Date(); const startDate = new Date(); startDate.setMonth(endDate.getMonth() - 1);
-            DOMElements.chartStartDate.value = startDate.toISOString().split('T')[0];
-            DOMElements.chartEndDate.value = endDate.toISOString().split('T')[0];
-            updateChartData(startDate, endDate);
-        });
-        DOMElements.chartRange1y.addEventListener('click', () => {
-            const endDate = new Date(); const startDate = new Date(); startDate.setFullYear(endDate.getFullYear() - 1);
-            DOMElements.chartStartDate.value = startDate.toISOString().split('T')[0];
-            DOMElements.chartEndDate.value = endDate.toISOString().split('T')[0];
-            updateChartData(startDate, endDate);
-        });
-        DOMElements.chartPopupOverlay.addEventListener('click', function(e) { if (e.target === this || e.target.classList.contains('modal-close-btn')) closeModal(this); });
     }
 
     // --- Alkalmazás Indítása ---
     async function init() {
         storage.loadState();
         if (!await fetchAppData()) return;
-        await fetchHistoricalRates();
         
         const { LANG } = APP_DATA;
         Object.keys(LANG).forEach(lang => {
@@ -958,6 +908,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         DOMElements.appVersion.textContent = APP_VERSION;
         DOMElements.eurHufRate.value = state.eurHufRate.toFixed(2);
+        updateExchangeRateDateDisplay();
         DOMElements.copyrightYear.textContent = new Date().getFullYear().toString();
         
         resetDimensionInputs();

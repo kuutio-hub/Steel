@@ -2,6 +2,44 @@
 
 A projekt minden jelentős változása ebben a fájlban lesz dokumentálva.
 
+## [2.1.0] - 2024-08-04
+
+### Hozzáadva
+- **Árfolyam dátum kijelzése:** Az EUR/HUF árfolyam mező mellett mostantól megjelenik a lekérdezett árfolyam dátuma. Ha az értéket a felhasználó manuálisan módosítja, egy "(kézi)" jelzés jelenik meg.
+
+### Eltávolítva
+- **Árfolyamgrafikon:** A grafikon funkció és a hozzá kapcsolódó historikus adatbázis teljes mértékben eltávolításra került az alkalmazás egyszerűsítése és a korábbi betöltési hibák megszüntetése érdekében.
+
+### Javítva
+- **"Glow" effektus:** A vizuális "ragyogás" effektus egységesítve lett az összes interaktív elemen, és javítva lett a levágódási hiba a panelek szélein.
+- **Adatbetöltés:** Az alkalmazás mostantól minden betöltéskor frissen kéri le az adatfájlokat, megkerülve a böngésző gyorsítótárát.
+
+
+## [2.0.0] - 2024-08-03
+
+### Hozzáadva
+- **Vizuális elválasztók:** A bemeneti és eredmény paneleken belül elválasztóvonalak kerültek bevezetésre a jobb vizuális tagolás érdekében.
+- **Összecsukható kategóriák:** Az anyagválasztó felugró ablakban a kategóriák (pl. "Szerkezeti acélok") mostantól összecsukhatók, ami jelentősen javítja a hosszú listák átláthatóságát.
+- **Kiterjesztett "Glow" effektek:** A legtöbb interaktív ikon (szerkesztés, törlés, kedvenc stb.) megkapta a jellegzetes ragyogás effektet. Az oldalak közötti átméretező sáv mostantól aktív használat (vonszolás) közben is ragyog.
+
+### Javítva
+- **Anyagválasztó túlcsordulás:** Kijavítva a hiba, ami miatt az anyagválasztó ablakban vízszintes görgetősáv jelent meg asztali nézetben.
+- **Bemeneti panel térközei:** Növelve lett a térköz a beviteli mezők csoportjai között, így a felület szellősebbé vált, és a "glow" effekt jobban érvényesül.
+
+### Módosítva
+- **Dizájnrendszer:** Frissült a belső dizájnrendszer leírása (v3), hogy tükrözze a legújabb vizuális finomításokat.
+
+## [1.9.0] - 2024-08-02
+
+### Javítva
+- **Árfolyamgrafikon hiba:** Javítva a hiba, amely miatt az árfolyamgrafikon nem jelent meg a felugró ablakban.
+- **Dizájn egységesítése:** Az árfolyamgrafikont tartalmazó felugró ablak dizájnja egységesítve lett az alkalmazás többi modális ablakával.
+
+### Módosítva
+- **Intenzívebb vizuális effektek:** Az összes interaktív elemen (gombok, beviteli mezők, listaelemek, eredmény-dobozok) jelentősen megnöveltük a `hover` és `focus` állapotoknál a "glow" (ragyogás) effektjét.
+- **Szöveg-kiemelés:** Sötét módban a `hover` állapotú elemek szövege mostantól ragyogó hatást kap (`text-shadow`), és az elemek enyhén meg is nőnek (`transform: scale`), hogy "kiugorjanak" a felületből.
+- **Elrendezés finomítása:** A "Teljes test értékei" szekcióban javítva a belső térközökön a jobb olvashatóság érdekében.
+
 ## [1.8.0] - 2024-08-01
 
 ### Hozzáadva
