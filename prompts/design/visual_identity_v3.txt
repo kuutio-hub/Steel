@@ -1,0 +1,53 @@
+# Metal Calculator - Vizuális identitás és dizájnrendszer v3
+
+Ez a dokumentum a Metal Calculator alkalmazás vizuális megjelenésének és felhasználói felületének alapelveit rögzíti.
+
+## 1. Általános hangulat és stílus
+- **Hangulat:** Modern, ipari, professzionális, letisztult, dinamikus.
+- **Inspiráció:** A Seattle Seahawks amerikaifutball-csapat hivatalos színei.
+
+## 2. Színpaletta
+
+### Sötét téma (Alapértelmezett)
+- **Elsődleges háttér:** `#011A32` (Legsötétebb navy)
+- **Másodlagos háttér (kártyák):** `#002244` (College Navy)
+- **Harmadlagos/Hover háttér:** `#1c3d5e`
+- **Kiemelő szín (Accent):** `#69BE28` (Action Green)
+- **Elsődleges szöveg:** `#e4e6eb`
+- **Másodlagos szöveg:** `#A5ACAF` (Wolf Gray)
+- **Szegélyek:** `#30363d`
+
+### Világos téma
+- **Elsődleges háttér:** `#A5ACAF` (Wolf Gray)
+- **Másodlagos háttér (kártyák):** `#ffffff`
+- **Harmadlagos/Hover háttér:** `#e9ecef`
+- **Kiemelő szín (Accent):** `#69BE28` (Action Green)
+- **Elsődleges szöveg:** `#002244` (College Navy)
+- **Másodlagos szöveg:** `#495057`
+- **Szegélyek:** `#dee2e6`
+
+## 3. Elrendezés (Layout)
+- **Asztali nézet (>992px):** Kétoszlopos, átméretezhető rács (`grid`).
+- **Mobil nézet (<992px):** Egyoszlopos elrendezés.
+- **Térközök:** Egységes `1.5rem` (`24px`) térköz a fő elemek között.
+- **Kártyák (`.card`):** Lekerekített sarkok (`12px`) és finom árnyékok (`box-shadow`) a mélységérzetért. A belső szekciókat (`.card-section`) vonal választja el.
+
+## 4. Tipográfia
+- **Betűtípus:** Rendszer-UI betűtípusok a maximális kompatibilitás és sebesség érdekében (`-apple-system, BlinkMacSystemFont, 'Segoe UI', ...`).
+- **Alap betűméret:** `14px`.
+- **Címek (`h1`, `h2`):** Sötét módban használják a kiemelő színt és egy finom "glow" hatást (`text-shadow`).
+
+## 5. Interaktivitás és effektek
+- **Intenzív "Glow" effekt:** Minden interaktív elem (beviteli mezők, gombok, választók, eredmény-dobozok) kapjon egy jól látható, a kiemelő színt használó ragyogást `:hover` állapotban, és egy még intenzívebbet `:focus` állapotban.
+  - `hover`: `box-shadow: 0 0 12px color-mix(in srgb, var(--bg-accent) 60%, transparent);`
+  - `focus`: `box-shadow: 0 0 0 3px color-mix(in srgb, var(--bg-accent) 30%, transparent), 0 0 18px color-mix(in srgb, var(--bg-accent) 80%, transparent);`
+- **Ikonok ragyogása:** Az interaktív gombokon és elemeken lévő SVG ikonok kapjanak `filter: drop-shadow(...)` effektet `:hover` állapotban.
+- **Átméretező sáv:** A sávnak nemcsak `:hover` állapotban, hanem aktív vonszolás közben is ragyognia kell.
+- **Szöveg ragyogása (Hover, sötét mód):** Az interaktív elemeken lévő szöveg, az ikonok és a fontos értékek váltsanak a kiemelő (`--bg-accent`) színre, és kapjanak egy fényszerű ragyogást (`text-shadow: 0 0 8px ...;`).
+- **Eredmény-dobozok:** Az eredményeket megjelenítő dobozok (`.result-item`) szintén kapjanak `hover` effektet (kiemelkedés és ragyogás), és a bennük lévő érték (`.result-item-value`) is kapja meg a szöveg-ragyogás effektet.
+
+## 6. Komponensek
+- **Gombok (`.btn`, `.control-btn`):** Lekerekített sarkok (`6px`), félkövér szöveg, egységes belső térközök.
+- **Beviteli mezők (`.input`):** Egységes stílus lekerekített sarkokkal, belső térközökkel és a téma szerinti háttérszínnel.
+- **Modális ablakok:** Áttetsző háttérrel rendelkező overlay. A tartalom egy középre igazított, lekerekített sarkú kártyában jelenik meg.
+  - **Választó ablak:** Tartalmaz egy keresőmezőt és egy listát. A listaelemek legyenek csoportosíthatók és összecsukhatók.

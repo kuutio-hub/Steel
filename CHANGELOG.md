@@ -2,6 +2,16 @@
 
 A projekt minden jelentős változása ebben a fájlban lesz dokumentálva.
 
+## [2.2.0] - 2024-08-05
+
+### Javítva
+- **Árszámítási hiba:** Az `Ár / kg` és `Ár / méter` mezők közötti kétirányú, valós idejű szinkronizáció most már helyesen működik az eseményfigyelők hozzáadásával. A számítás azonnal megtörténik gépelés közben.
+
+### Módosítva
+- **Tiszta indulási állapot:** Az alkalmazás mostantól minden betöltéskor üres számítási mezőkkel indul. A böngésző csak a felhasználói beállításokat (téma, nyelv, kedvencek, egyéni anyagok) tartja meg, a korábbi számítási adatokat nem.
+- **Vizuális effektek:** Az összes interaktív ikon (beleértve a lenyitható panelek nyilait is) és a mértékegység-váltók is megkapták az egységes, intenzív "glow" (ragyogás) effektet a konzisztens vizuális visszajelzés érdekében.
+- **Felhasználói felület:** A választást segítő felugró ablakok listáiban a korábban kiválasztott elem már nincs vizuálisan kiemelve a letisztultabb és egyszerűbb használat érdekében.
+
 ## [2.1.0] - 2024-08-04
 
 ### Hozzáadva
